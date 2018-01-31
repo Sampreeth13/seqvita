@@ -20,12 +20,13 @@ make
 
 ```
 # VARIANT CALLING FROM ALIGNMENT FILE
-./calOptBinSize -c <config file> -i <input BAM>
+
 
 # VARIANT CALLING FROM MPILEUP FILE
-./prepareData -m <mappability file> -g <gc content file> --win <desired window size> --genome_file <Genome file> -o <Output file name prefix>
+
+# VARIANT CALLING FROM WES/TS FILES
 
 # VARIANT ANNOTATION
-./pretreatment -i <input BAM> -z <bed file containing bins> --mapfile < file contaning mappability values> -o <output prefix> --gcfile <file containing GC scores>
+
 
 ```
