@@ -20,22 +20,52 @@ variant_calling_type="";
 
 SOURCEDIR=$(dirname $(readlink -f $0))
 
-while getopts 'c:a:q:f:h:p:s:i:r:o:v:' par; do
-  case ${par} in
-    c) min_coverage="${OPTARG}" ;;
-    a) min_reads2="${OPTARG}" ;;
-    q) min_avg_qual="${OPTARG}" ;;
-    f) min_var_freq="${OPTARG}" ;;
-    h) min_freq_for_hom="${OPTARG}" ;;
-    p) p_value="${OPTARG}" ;;
-    s) strand_filter="${OPTARG}" ;;
-    i) input_file="${OPTARG}" ;;
-    r) reference_file="${OPTARG}" ;;
-    o) output_file="${OPTARG}" ;;
-    v) variant_calling_type="${OPTARG}" ;;
-    \?) echo "You have entered an invalid option: -$OPTARG" >& 2 exit ;;
+while [ -n "$1" ]
+do
+  case "$1" in
+    -c) min_coverage="$2"
+    shift;;
+    -a) min_reads2="$2"
+    shift;;
+    -q) min_avg_qual="$2"
+    shift;;
+    -f) min_var_freq="$2"
+    shift;;
+    -h) min_freq_for_hom="$2"
+    shift;;
+    -p) p_value="$2"
+    shift;;
+    -s) strand_filter="$2"
+    shift;;
+    -i) input_file="$2"
+    shift;;
+    -r) reference_file="$2"
+    shift;;
+    -o) output_file="$2"
+    shift;;
+    -v) variant_calling_type="$2"
+    shift;;
+    *) echo "You have entered an invalid option: -$1";;
   esac
+  shift
 done
-#echo $reference_file
-samtools mpileup -f $reference_file -B $input_file > $output_file.mpileup
-$SOURCEDIR/dsv $variant_calling_type ./$output_file.mpileup --min-coverage $min_coverage --min-reads2 $min_reads2 --min-avg-qual $min_avg_qual --min-var-freq $min_var_freq --min-freq-for-hom $min_freq_for_hom --p-value $p_value --strand-filter $strand_filter > $output_file.vcf
+
+#while getopts 'c:a:q:f:h:p:s:i:r:o:v:' par; do
+#  case ${par} in
+#    c) min_coverage="${OPTARG}" ;;
+#    a) min_reads2="${OPTARG}" ;;
+#    q) min_avg_qual="${OPTARG}" ;;
+#    f) min_var_freq="${OPTARG}" ;;
+#    h) min_freq_for_hom="${OPTARG}" ;;
+#    p) p_value="${OPTARG}" ;;
+#    s) strand_filter="${OPTARG}" ;;
+#    i) input_file="${OPTARG}" ;;
+#    r) reference_file="${OPTARG}" ;;
+#    o) output_file="${OPTARG}" ;;
+#    v) variant_calling_type="${OPTARG}" ;;
+#    \?) echo "You have entered an invalid option: -$OPTARG" >& 2 exit ;;
+#  esac
+#done
+echo $reference_file
+#samtools mpileup -f $reference_file -B $input_file > $output_file.mpileup
+#$SOURCEDIR/dsv $variant_calling_type ./$output_file.mpileup --min-coverage $min_coverage --min-reads2 $min_reads2 --min-avg-qual $min_avg_qual --min-var-freq $min_var_freq --min-freq-for-hom $min_freq_for_hom --p-value $p_value --strand-filter $strand_filter > $output_file.vcf
