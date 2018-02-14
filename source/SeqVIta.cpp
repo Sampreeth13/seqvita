@@ -320,6 +320,7 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
       ss << std::scientific;
       ss << var_pval << std::endl;
       string pvalstr =ss.str();
+      pvalstr.pop_back();
       /*if(GQ[1][0] == 'N')
         GQ[1] = ".";
       else{
@@ -342,8 +343,10 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
         continue;
       }
       int GQ = -10*log10(var_pval);
-
-      Genotype += ":" + itoa(GQ) + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
+      if(GQ > 255 || GQ <= 0){
+        GQ = 255;
+      }
+      Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
       //int depth = individual[i].forward_var+individual[i].reverse_var;
       Genotype += itoa(var_depth) + ":" ;
       float temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
