@@ -320,6 +320,7 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
       ss << std::scientific;
       ss << var_pval << std::endl;
       string pvalstr =ss.str();
+      pvalstr.pop_back();
       /*if(GQ[1][0] == 'N')
         GQ[1] = ".";
       else{
@@ -342,8 +343,10 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
         continue;
       }
       int GQ = -10*log10(var_pval);
-
-      Genotype += ":" + itoa(GQ) + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
+      if(GQ > 255 || GQ <= 0){
+        GQ = 255;
+      }
+      Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
       //int depth = individual[i].forward_var+individual[i].reverse_var;
       Genotype += itoa(var_depth) + ":" ;
       float temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
@@ -690,74 +693,92 @@ void findindel(char ** argv)
   std::string str;
   int number_of_SNPs=0;
   bool vcf_header_flag = 0;
-  while(std::getline(file,str))
+  int sstop = 0;
+  //omp_set_num_threads(4);
+  #pragma omp parallel private(str)
   {
-    vector<string> pileup;
-    char delimiter = '	';
-    pileup = split(str, delimiter,pileup);
-    int no_of_samples = (pileup.size() - 3)/3;
-    if(vcf_header_flag == 0)
+    while(!sstop)
     {
-      vcf_header_flag = 1;
-      vcf_Header(min_avg_qual,no_of_samples);
-    }
-    int i;
-    vector <data> individual(no_of_samples);
-    bool var_flag = 0;
-    for(i = 0;i < no_of_samples;i++)
-    {
-      int rawdepth = atoi(pileup[3+3*i].c_str());
-      string bases = pileup[4+3*i];
-      string qualities = pileup[5+3*i];
-      individual[i].setzero();
-      detectvariant(individual[i],bases,qualities,rawdepth);
-      //std::cout << individual[i].quality_depth << '\n';
-      if(individual[i].quality_depth < min_coverage)
+      #pragma omp critical
       {
-        continue;
+        if(!(std::getline(file,str))){
+          sstop = 1;
+          //break;
+        }
       }
-      else
+      if(sstop){
+        #pragma omp flush(sstop)
+      }
+      if(sstop){
+        break;
+      }
+      vector<string> pileup;
+      char delimiter = '	';
+      pileup = split(str, delimiter,pileup);
+      int no_of_samples = (pileup.size() - 3)/3;
+      if(vcf_header_flag == 0)
       {
-        int Var_allele_count = 0;
-        Var_allele_count = individual[i].forward_var + individual[i].reverse_var;
-        //std::cout << "Var allele :"<<Var_allele_count << '\n';
-        if(Var_allele_count < min_reads2)
+        vcf_header_flag = 1;
+        vcf_Header(min_avg_qual,no_of_samples);
+      }
+      int i;
+      vector <data> individual(no_of_samples);
+      bool var_flag = 0;
+      for(i = 0;i < no_of_samples;i++)
+      {
+        int rawdepth = atoi(pileup[3+3*i].c_str());
+        string bases = pileup[4+3*i];
+        string qualities = pileup[5+3*i];
+        individual[i].setzero();
+        detectvariant(individual[i],bases,qualities,rawdepth);
+        //std::cout << individual[i].quality_depth << '\n';
+        if(individual[i].quality_depth < min_coverage)
         {
           continue;
         }
         else
         {
-          float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
-          float temp = float(Var_allele_count)/float(individual[i].quality_depth);
-          //std::cout << strandedness << '\n';
-          if(strandedness < 0.1 || strandedness > 0.9 )
+          int Var_allele_count = 0;
+          Var_allele_count = individual[i].forward_var + individual[i].reverse_var;
+          //std::cout << "Var allele :"<<Var_allele_count << '\n';
+          if(Var_allele_count < min_reads2)
           {
             continue;
-          }
-          //std::cout << temp << '\n';
-          if(temp < min_var_freq)
-          {
-            continue;
-          }
-          else if(temp < min_freq_for_hom)
-          {
-            individual[i].is_hetero = 1;
           }
           else
           {
-            individual[i].is_homo = 1;
+            float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
+            float temp = float(Var_allele_count)/float(individual[i].quality_depth);
+            //std::cout << strandedness << '\n';
+            if(strandedness < 0.1 || strandedness > 0.9 )
+            {
+              continue;
+            }
+            //std::cout << temp << '\n';
+            if(temp < min_var_freq)
+            {
+              continue;
+            }
+            else if(temp < min_freq_for_hom)
+            {
+              individual[i].is_hetero = 1;
+            }
+            else
+            {
+              individual[i].is_homo = 1;
+            }
           }
         }
+        individual[i].var_flag = 1;
+        if(individual[i].variant_type == "INS" ||individual[i].variant_type == "DEL"){
+          var_flag = 1;
+          number_of_SNPs++;
+        }
       }
-      individual[i].var_flag = 1;
-      if(individual[i].variant_type == "INS" ||individual[i].variant_type == "DEL"){
-        var_flag = 1;
-        number_of_SNPs++;
+      if(var_flag)
+      {
+        pileuptovcf(pileup,individual);
       }
-    }
-    if(var_flag)
-    {
-      pileuptovcf(pileup,individual);
     }
   }
 }
@@ -768,73 +789,91 @@ void findgermline(char ** argv)
   std::string str;
   int number_of_SNPs=0;
   bool vcf_header_flag = 0;
-  while(std::getline(file,str))
+  int sstop = 0;
+  //omp_set_num_threads(4);
+  #pragma omp parallel private(str)
   {
-    vector<string> pileup;
-    char delimiter = '	';
-    pileup = split(str, delimiter,pileup);
-    //std::cout << pileup.size() << '\n';
-    int no_of_samples = (pileup.size() - 3)/3;
-    if(vcf_header_flag == 0)
+    while(!sstop)
     {
-      vcf_header_flag = 1;
-      vcf_Header(min_avg_qual,no_of_samples);
-    }
-    int i;
-    vector <data> individual(no_of_samples);
-    bool var_flag = 0;
-    for(i = 0;i < no_of_samples;i++)
-    {
-      int rawdepth = atoi(pileup[3+3*i].c_str());
-      string bases = pileup[4+3*i];
-      string qualities = pileup[5+3*i];
-      individual[i].setzero();
-      detectvariant(individual[i],bases,qualities,rawdepth);
-      //std::cout << "Quality Depth :" << individual[i].quality_depth << '\n';
-      if(individual[i].quality_depth < min_coverage)
+      #pragma omp critical
       {
-        continue;
+        if(!(std::getline(file,str))){
+          sstop = 1;
+          //break;
+        }
       }
-      else
+      if(sstop){
+        #pragma omp flush(sstop)
+      }
+      if(sstop){
+        break;
+      }
+      vector<string> pileup;
+      char delimiter = '	';
+      pileup = split(str, delimiter,pileup);
+      //std::cout << pileup.size() << '\n';
+      int no_of_samples = (pileup.size() - 3)/3;
+      if(vcf_header_flag == 0)
       {
-        int Var_allele_count = 0;
-        Var_allele_count = individual[i].forward_var + individual[i].reverse_var;
-        //std::cout << "Var allele :"<< individual[i].forward_var+individual[i].reverse_var << '\n';
-        if(Var_allele_count < min_reads2)
+        vcf_header_flag = 1;
+        vcf_Header(min_avg_qual,no_of_samples);
+      }
+      int i;
+      vector <data> individual(no_of_samples);
+      bool var_flag = 0;
+      for(i = 0;i < no_of_samples;i++)
+      {
+        int rawdepth = atoi(pileup[3+3*i].c_str());
+        string bases = pileup[4+3*i];
+        string qualities = pileup[5+3*i];
+        individual[i].setzero();
+        detectvariant(individual[i],bases,qualities,rawdepth);
+        //std::cout << "Quality Depth :" << individual[i].quality_depth << '\n';
+        if(individual[i].quality_depth < min_coverage)
         {
           continue;
         }
         else
         {
-          float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
-          float temp = float(Var_allele_count)/float(individual[i].quality_depth);
-          if(strandedness < 0.1 || strandedness > 0.9 )
+          int Var_allele_count = 0;
+          Var_allele_count = individual[i].forward_var + individual[i].reverse_var;
+          //std::cout << "Var allele :"<< individual[i].forward_var+individual[i].reverse_var << '\n';
+          if(Var_allele_count < min_reads2)
           {
             continue;
-          }
-          if(temp < min_var_freq)
-          {
-            continue;
-          }
-          else if(temp < min_freq_for_hom)
-          {
-            individual[i].is_hetero = 1;
           }
           else
           {
-            individual[i].is_homo = 1;
+            float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
+            float temp = float(Var_allele_count)/float(individual[i].quality_depth);
+            if(strandedness < 0.1 || strandedness > 0.9 )
+            {
+              continue;
+            }
+            if(temp < min_var_freq)
+            {
+              continue;
+            }
+            else if(temp < min_freq_for_hom)
+            {
+              individual[i].is_hetero = 1;
+            }
+            else
+            {
+              individual[i].is_homo = 1;
+            }
           }
         }
+        individual[i].var_flag = 1;
+        var_flag = 1;
+        number_of_SNPs++;
+        //std::cout << pileup[1] << '\n';
       }
-      individual[i].var_flag = 1;
-      var_flag = 1;
-      number_of_SNPs++;
-      //std::cout << pileup[1] << '\n';
-    }
-    //std::cout << var_flag << '\n';
-    if(var_flag)
-    {
-      pileuptovcf(pileup,individual);
+      //std::cout << var_flag << '\n';
+      if(var_flag)
+      {
+        pileuptovcf(pileup,individual);
+      }
     }
   }
 }

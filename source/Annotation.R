@@ -6,7 +6,7 @@ txdb <- makeTxDbFromGFF(file=fl,format="gtf")
 fl <- system.file("extdata", "SRR1518358_default.vcf",package="VariantAnnotation")
 vcf <- readVcf('Variants_20_30.vcf', "hg19")
 
-fa <- open(FaFile('human_gik_v37.fasta'))
+fa <- open(FaFile('human_g1k_v37.fasta'))
 coding1 <- predictCoding(vcf,txdb,fa)
 final <- data.frame(seqnames=seqnames(coding1),start=start(coding1),ref=coding1$REF,alt=coding1$ALT,type=coding1$CONSEQUENCE,gene_id=coding1$GENEID)
 test <- final
