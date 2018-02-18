@@ -1,20 +1,29 @@
 suppressPackageStartupMessages(library(GenomicFeatures))
 suppressPackageStartupMessages(library(VariantAnnotation))
 suppressPackageStartupMessages(library(dplyr))
-fl <- ("hg19_refGene.gtf")
-txdb <- makeTxDbFromGFF(file=fl,format="gtf")
-fl <- system.file("extdata", "SRR1518358_default.vcf",package="VariantAnnotation")
-vcf <- readVcf('Variants_20_30.vcf', "hg19")
-
-fa <- open(FaFile('human_g1k_v37.fasta'))
+suppressPackageStartupMessages(library(rfPred))
+arg <- commandArgs(trailingOnly = TRUE)
+txdb <- makeTxDbFromGFF(file=arg[1],format="gtf")
+vcf <- readVcf(arg[2], "hg19")
+if(identical(intersect(seqlevels(vcf),seqlevels(txdb)),character(0))){
+  if(identical(intersect(seqlevels(vcf),"1"),character(0))){
+    txdb <- renameSeqlevels(txdb, paste0("chr", seqlevels(txdb)))
+  }
+  else{
+    vcf <- renameSeqlevels(vcf, paste0("chr", seqlevels(vcf)))
+  }
+}
+fa <- open(FaFile(arg[3]))
 coding1 <- predictCoding(vcf,txdb,fa)
 final <- data.frame(seqnames=seqnames(coding1),start=start(coding1),ref=coding1$REF,alt=coding1$ALT,type=coding1$CONSEQUENCE,gene_id=coding1$GENEID)
 test <- final
 final <- test[,c("seqnames","start","ref","alt.value","type","gene_id")]
 ans <- final %>% group_by(seqnames,start,ref,alt.value,type) %>% summarise(gene_id = toString(gene_id)) %>% as.data.frame
-test <-  rfPred_scores(variant_list = ans[1:4],data="all_chr_rfPred.txtz",index="all_chr_rfPred.txtz.tbi",all.col = TRUE)
-write.table(ans, file="foo.bed", quote=F, sep="\t", row.names=F, col.names=F)
-
+ans$seqnames<-gsub("chr(*)","\\1",ans$seqnames)
+test <-  rfPred_scores(variant_list = ans[1:4],data=arg[4],index=arg[5],all.col = TRUE)
+p <- merge(x=ans,y=test,by.x=c("seqnames", "start"),by.y=c("chromosome","position_hg19"),all.x=TRUE)
+q<-p[with(p,order(start)), ]
+r<-q[,c("seqnames","start","ref","alt.value","type","gene_id","SIFT_score","Polyphen2_score","MutationTaster_score")]
 loc_all <- locateVariants(vcf, txdb, AllVariants())
 tets <- unique(loc_all)
 final1 <- data.frame(seqnames=seqnames(tets),start=start(tets),location=tets$LOCATION,gene_id=tets$GENEID,QUERYID=tets$QUERYID)
@@ -44,6 +53,7 @@ var1 <- var[,c("seqnames","start","REF","ALT.value")]
 b <- merge(x=a,y=var1,by.x=c("seqnames", "start"),by.y=c("seqnames","start"),all.x = TRUE)
 new <- b[order(b$QUERYID),]
 c <- new[,c("seqnames","start","REF","ALT.value","location","gene_id","PRECEDEID","FOLLOWID")]
-d <- merge(x=b,y=ans,by.x=c("seqnames","start"),by.y=c("seqnames","start"),all.x=TRUE)
-e <- d[,c("seqnames","start","REF","ALT.value","location","gene_id.x","PRECEDEID","FOLLOWID","type")]
-write.table(e, file="Ann.txt", quote=F, sep="\t", row.names=F, col.names=F)
+d <- merge(x=b,y=r,by.x=c("seqnames","start"),by.y=c("seqnames","start"),all.x=TRUE)
+e <- d[,c("seqnames","start","REF","ALT.value","location","gene_id.x","PRECEDEID","FOLLOWID","type","SIFT_score","Polyphen2_score","MutationTaster_score")]
+e <- unique(e)
+write.table(e, file=arg[6], quote=F, sep="\t", row.names=F, col.names=F)
