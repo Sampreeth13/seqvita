@@ -20,9 +20,10 @@ using namespace std;
 int min_coverage = 8;
 int min_reads2 = 2;
 int min_avg_qual = 15;
-float min_var_freq = 0.01;
+float min_var_freq = 0.20;
 float min_freq_for_hom = 0.75;
 float p_value = 0.99;
+float somatic_p_value = 0.05;
 int strand_filter =1;
 
 struct data
@@ -199,7 +200,7 @@ std::vector<std::string> Get_Pvalue(int a, int b)
 void vcf_Header(int minAvgQual,int no_of_samples)
 {
   string vcf_header = "##fileformat=VCFv4.1\n";
-  vcf_header += "##source=VarScan2\n";
+  vcf_header += "##source=SeqVItA\n";
   vcf_header += "##INFO=<ID=ADP,Number=1,Type=Integer,Description=\"Average per-sample depth of bases with Phred score >= " + itoa(minAvgQual) + "\">\n";
   vcf_header += "##INFO=<ID=WT,Number=1,Type=Integer,Description=\"Number of samples called reference (wild-type)\">\n";
   vcf_header += "##INFO=<ID=HET,Number=1,Type=Integer,Description=\"Number of samples called heterozygous-variant\">\n";
@@ -228,6 +229,302 @@ void vcf_Header(int minAvgQual,int no_of_samples)
   }
   //std::cout << vcf_header << std::endl;
   printf("%s\n",vcf_header.c_str());
+}
+
+void Somatic_vcf_Header(int minAvgQual,int no_of_samples)
+{
+  string vcf_header = "##fileformat=VCFv4.1\n";
+  vcf_header += "##source=SeqVItA\n";
+  vcf_header += "##INFO=<ID=ADP,Number=1,Type=Integer,Description=\"Average per-sample depth of bases with Phred score >= " + itoa(minAvgQual) + "\">\n";
+  vcf_header += "##INFO=<ID=SS,Number=1,Type=string,Description=\"Somatic status of the normal-tumor pair\">\n";
+  vcf_header += "##INFO=<ID=CONF,Number=1,Type=String,Description=\"Confidence of the somatic call\">\n";
+  vcf_header += "##INFO=<ID=SPV,Number=1,Type=String,Description=\"Somatic P-value\">\n";
+  vcf_header += "##INFO=<ID=VPV,Number=1,Type=String,Description=\"Variant P-value\">\n";
+  vcf_header += "##FILTER=<ID=str10,Description=\"Less than 10% or more than 90% of variant supporting reads on one strand\">\n";
+  vcf_header += "##FILTER=<ID=indelError,Description=\"Likely artifact due to indel reads at this position\">\n";
+  vcf_header += "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n";
+  vcf_header += "##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">\n";
+  vcf_header += "##FORMAT=<ID=SDP,Number=1,Type=Integer,Description=\"Raw Read Depth as reported by SAMtools\">\n";
+  vcf_header += "##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Quality Read Depth of bases with Phred score >= " + itoa(minAvgQual) + "\">\n";
+  vcf_header += "##FORMAT=<ID=RD,Number=1,Type=Integer,Description=\"Depth of reference-supporting bases (reads1)\">\n";
+  vcf_header += "##FORMAT=<ID=AD,Number=1,Type=Integer,Description=\"Depth of variant-supporting bases (reads2)\">\n";
+  vcf_header += "##FORMAT=<ID=FREQ,Number=1,Type=String,Description=\"Variant allele frequency\">\n";
+  vcf_header += "##FORMAT=<ID=PVAL,Number=1,Type=String,Description=\"P-value from Fisher's Exact Test\">\n";
+  vcf_header += "##FORMAT=<ID=RBQ,Number=1,Type=Integer,Description=\"Average quality of reference-supporting bases (qual1)\">\n";
+  vcf_header += "##FORMAT=<ID=ABQ,Number=1,Type=Integer,Description=\"Average quality of variant-supporting bases (qual2)\">\n";
+  vcf_header += "##FORMAT=<ID=RDF,Number=1,Type=Integer,Description=\"Depth of reference-supporting bases on forward strand (reads1plus)\">\n";
+  vcf_header += "##FORMAT=<ID=RDR,Number=1,Type=Integer,Description=\"Depth of reference-supporting bases on reverse strand (reads1minus)\">\n";
+  vcf_header += "##FORMAT=<ID=ADF,Number=1,Type=Integer,Description=\"Depth of variant-supporting bases on forward strand (reads2plus)\">\n";
+  vcf_header += "##FORMAT=<ID=ADR,Number=1,Type=Integer,Description=\"Depth of variant-supporting bases on reverse strand (reads2minus)\">\n";
+  vcf_header +=  "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
+  for(int colCounter = 0; colCounter < no_of_samples; colCounter++)
+  {
+    vcf_header += "\tSample" + itoa(colCounter+1);
+  }
+  //std::cout << vcf_header << std::endl;
+  printf("%s\n",vcf_header.c_str());
+}
+
+void Somaticpileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//convert the variant obtained into vcf format
+{
+  //std::cout << "Entered" << '\n';
+  //std::cout << individual[0].quality_depth << '\n';
+  //std::cout << pileup[1] << '\n';
+  int i;
+  int no_of_samples = individual.size();
+  char Reference = pileup[2][0];
+  if(pileup[2][0] <= 'z' && pileup[2][0] >= 'a')
+  {
+    Reference = pileup[2][0] - 'a' + 'A';
+  }
+  string vcf_line = pileup[0] + '\t' + pileup[1] + '\t' + '.' + '\t';
+  int position = 0;
+  int deletion_size = 0;
+  string ref(1,Reference);
+  for (i=0;i<no_of_samples;i++){
+    if(individual[i].var_flag && individual[i].variant_type == "DEL"){
+        deletion_size = individual[i].variant.length();
+        if(deletion_size > ref.length()-1){
+          ref = Reference;
+          ref += individual[i].variant;
+      }
+    }
+  }
+  vcf_line += ref + '\t';
+  set <string> variant_list;
+  map <string,int> variant_order;
+  int variant_number = 1;
+  for(i=0;i<no_of_samples;i++){
+    if(individual[i].var_flag){
+      if(individual[i].variant_type == "DEL"){
+        string del = ref;
+        del.erase(ref.length()-individual[i].variant.length());
+        individual[i].variant.clear();
+        individual[i].variant += del;
+      }
+      if(individual[i].variant_type == "INS"){
+        string ins(1,ref[0]);
+        ins += individual[i].variant + ref.substr(1);
+        individual[i].variant.clear();
+        individual[i].variant += ins;
+      }
+      if(individual[i].variant_type == "SNP"){
+        string snp = ref;
+        snp[0] = individual[i].variant[0];
+        individual[i].variant.clear();
+        individual[i].variant += snp;
+      }
+      if(variant_list.find(individual[i].variant) == variant_list.end()){
+        variant_list.insert(individual[i].variant);
+        variant_order[individual[i].variant] = variant_number++;
+        vcf_line += individual[i].variant + ",";
+      }
+    }
+  }
+  vcf_line = vcf_line.substr(0,vcf_line.size()-1);
+  vcf_line += "\t.\tPASS\t";
+  int total_depth = 0;
+  int wild_type = 0;
+  int homozygous = 0;
+  int heterozygous = 0;
+  string Genotype = "";
+  string somatic_status = "";
+  string conf = "";
+  double som_p_val = fisher_test(individual[1].forward_ref + individual[1].reverse_ref,individual[1].forward_var + individual[1].reverse_var,individual[0].forward_ref + individual[0].reverse_ref,individual[0].forward_var + individual[0].reverse_var);
+
+  if(individual[0].var_flag == 0){
+    individual[0].variant = "";
+  }
+  if(individual[1].var_flag == 0){
+    individual[1].variant = "";
+  }
+  if(individual[0].variant == individual[1].variant){
+    if(individual[0].var_flag && individual[1].var_flag){
+      somatic_status = "Germline";
+      float nor_vaf = float(individual[0].forward_var+individual[0].reverse_var)/float(individual[0].quality_depth);
+      float tum_vaf = float(individual[1].forward_var+individual[1].reverse_var)/float(individual[1].quality_depth);
+      if(nor_vaf >= 0.1 && tum_vaf >= 0.1){
+        conf = "High";
+      }
+      else{
+        conf = "Low";
+      }
+    }
+  }
+  else{
+    if(som_p_val < somatic_p_value){
+      if(individual[0].var_flag == 0){
+        somatic_status = "Somatic";
+        float nor_vaf = float(individual[0].forward_var+individual[0].reverse_var)/float(individual[0].quality_depth);
+        float tum_vaf = float(individual[1].forward_var+individual[1].reverse_var)/float(individual[1].quality_depth);
+        if(nor_vaf < 0.05 && tum_vaf >= 0.1 && som_p_val < 0.07){
+          conf = "High";
+        }
+        else{
+          conf = "Low";
+        }
+      }
+      else if(individual[0].is_hetero){
+        somatic_status = "LOH";
+        float nor_vaf = float(individual[0].forward_var+individual[0].reverse_var)/float(individual[0].quality_depth);
+        float tum_vaf = float(individual[1].forward_var+individual[1].reverse_var)/float(individual[1].quality_depth);
+        if(nor_vaf >= 0.1 && som_p_val < 0.07){
+          conf = "High";
+        }
+        else{
+          conf = "Low";
+        }
+      }
+      else{
+        //if(individual[0].var_flag && individual[1].var_flag && individual[0].variant != individual[1].variant){
+          somatic_status = "Unknown";
+          conf = "None";
+        //}
+      }
+    }
+    else{
+      somatic_status = "Germline";
+      float nor_vaf = float(individual[0].forward_var+individual[0].reverse_var)/float(individual[0].quality_depth);
+      float tum_vaf = float(individual[1].forward_var+individual[1].reverse_var)/float(individual[1].quality_depth);
+      if(nor_vaf >= 0.1 && tum_vaf >= 0.1){
+        conf = "High";
+      }
+      else{
+        conf = "Low";
+      }
+    }
+  }
+  stringstream ss;
+  ss << std::scientific;
+  ss << som_p_val << std::endl;
+  string spvalstr =ss.str();
+  spvalstr.pop_back();
+  int d = (individual[0].quality_depth+individual[1].quality_depth)*0.001;
+  double var_pval = fisher_test(individual[1].forward_ref + individual[1].reverse_ref+individual[0].forward_ref + individual[0].reverse_ref,individual[1].forward_var + individual[1].reverse_var + individual[0].forward_var + individual[0].reverse_var,individual[0].quality_depth+individual[1].quality_depth-d,d);
+  stringstream aa;
+  aa << std::scientific;
+  aa << var_pval << std::endl;
+  string pvalstr =ss.str();
+  pvalstr.pop_back();
+  vcf_line += "SS=" + somatic_status + ";CONF=" + conf + ";SPV=" + spvalstr + ";VPV=" + pvalstr;
+
+  for(i = 0;i < no_of_samples;i++)
+  {
+
+    int ref_depth = individual[i].forward_ref + individual[i].reverse_ref;
+    int var_depth = individual[i].forward_var + individual[i].reverse_var;
+    //std::cout << ref_depth << '\n';
+
+    Genotype += "\t";
+    if(individual[i].var_flag)
+    {
+      //std::cout << "/* message */" << '\n';
+      if(individual[i].is_homo)
+      {
+        homozygous++;
+        int geno = variant_order[individual[i].variant];
+        Genotype += to_string(geno) + "/" + to_string(geno);
+      }
+      else if(individual[i].is_hetero)
+      {
+        heterozygous++;
+        int geno = variant_order[individual[i].variant];
+        Genotype +=  "0/" + to_string(geno);
+      }
+      //vector <string> GQ = Get_Pvalue(ref_depth,var_depth);
+      //std::cout << "/* message */" << '\n';
+      int d = (ref_depth+var_depth)*0.001;
+      double var_pval = fisher_test(ref_depth,var_depth,individual[i].quality_depth-d,d);
+      stringstream ss;
+      ss << std::scientific;
+      ss << var_pval << std::endl;
+      string pvalstr =ss.str();
+      pvalstr.pop_back();
+
+      int GQ = -10*log10(var_pval);
+      if(GQ > 255 || GQ <= 0){
+        GQ = 255;
+      }
+      Genotype += ":" + itoa(GQ) + ":" + pileup[3+3*i] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
+      //int depth = individual[i].forward_var+individual[i].reverse_var;
+
+      Genotype += itoa(var_depth) + ":" ;
+      float temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
+      Genotype += ftoa(float(temp)/100) + "%:" + pvalstr + ":";
+
+      if(ref_depth)
+      {
+        if(var_depth){
+          Genotype += itoa(individual[i].quality_ref/ref_depth) + ":" + itoa(individual[i].quality_var/var_depth);
+        }
+        else{
+          Genotype += itoa(individual[i].quality_ref/ref_depth) + ":" + string("0") ;
+        }
+      }
+      else
+      {
+        Genotype += string("0") + ":" + itoa(individual[i].quality_var/var_depth);
+        if(var_depth){
+          Genotype += string("0") + ":" + itoa(individual[i].quality_var/var_depth);
+        }
+        else{
+          Genotype += string("0") + ":" + string("0");
+        }
+      }
+      Genotype += ":" + itoa(individual[i].forward_ref) + ":" + itoa(individual[i].reverse_ref) + ":" + itoa(individual[i].forward_var) + ":" + itoa(individual[i].reverse_var);
+    }
+    else
+    {
+
+      wild_type++;
+      Genotype += "0/0";
+      int d = (ref_depth+var_depth)*0.001;
+      double var_pval = fisher_test(ref_depth,var_depth,individual[i].quality_depth-d,d);
+      stringstream ss;
+      ss << std::scientific;
+      ss << var_pval << std::endl;
+      string pvalstr =ss.str();
+      pvalstr.pop_back();
+      int GQ = -10*log10(var_pval);
+      if(GQ > 255 || GQ <= 0){
+        GQ = 255;
+      }
+
+      Genotype += ":" + itoa(GQ) + ":" + pileup[3+3*i] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
+      //int depth = individual[i].forward_var+individual[i].reverse_var;
+      Genotype += itoa(var_depth) + ":" ;
+      float temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
+      Genotype += ftoa(float(temp)/100) + "%:" + pvalstr + ":";
+
+      if(ref_depth)
+      {
+        if(var_depth){
+          Genotype += itoa(individual[i].quality_ref/ref_depth) + ":" + itoa(individual[i].quality_var/var_depth);
+        }
+        else{
+          Genotype += itoa(individual[i].quality_ref/ref_depth) + ":" + string("0") ;
+        }
+      }
+      else
+      {
+        Genotype += string("0") + ":" + itoa(individual[i].quality_var/var_depth);
+        if(var_depth){
+          Genotype += string("0") + ":" + itoa(individual[i].quality_var/var_depth);
+        }
+        else{
+          Genotype += string("0") + ":" + string("0");
+        }
+      }
+      Genotype += ":" + itoa(individual[i].forward_ref) + ":" + itoa(individual[i].reverse_ref) + ":" + itoa(individual[i].forward_var) + ":" + itoa(individual[i].reverse_var);
+
+    }
+    total_depth += individual[i].quality_depth;
+  }
+
+  //vcf_line += "ADP=" + itoa(total_depth/no_of_samples) + ";WT=" + itoa(wild_type) + ";HET=" + itoa(heterozygous) + ";HOM=" + itoa(homozygous) + ";NC=" + itoa(no_of_samples - heterozygous - homozygous - wild_type);
+  vcf_line += "\tGT:GQ:SDP:DP:RD:AD:FREQ:PVAL:RBQ:ABQ:RDF:RDR:ADF:ADR" + Genotype;
+  //std::cout << vcf_line << std::endl;
+  printf("%s\n",vcf_line.c_str() );
 }
 
 void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//convert the variant obtained into vcf format
@@ -337,11 +634,6 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
           GQ[1] = "255";
         }
       }*/
-      if(var_pval > p_value){
-        individual[i].var_flag = 0;
-        i--;
-        continue;
-      }
       int GQ = -10*log10(var_pval);
       if(GQ > 255 || GQ <= 0){
         GQ = 255;
@@ -620,10 +912,14 @@ void findsnp(char ** argv)
       char delimiter = '	';
       pileup = split(str, delimiter,pileup);
       int no_of_samples = (pileup.size() - 3)/3;
-      if(vcf_header_flag == 0)
+      #pragma omp critical
       {
-        vcf_header_flag = 1;
-        vcf_Header(min_avg_qual,no_of_samples);
+        if(vcf_header_flag == 0)
+        {
+          vcf_header_flag = 1;
+          vcf_Header(min_avg_qual,no_of_samples);
+        }
+
       }
       int i;
       vector <data> individual(no_of_samples);
@@ -638,6 +934,7 @@ void findsnp(char ** argv)
         //std::cout << "Started" << '\n';
         detectvariant(individual[i],bases,qualities,rawdepth);
         //std::cout << "Ended" << '\n';
+        //std::cout << individual[i].quality_depth << '\n';
         if(individual[i].quality_depth < min_coverage)
         {
           continue;
@@ -654,7 +951,7 @@ void findsnp(char ** argv)
           {
             float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
             float temp = float(Var_allele_count)/float(individual[i].quality_depth);
-            if(strandedness < 0.1 || strandedness > 0.9 )
+            if(strand_filter && (strandedness < 0.1 || strandedness > 0.9))
             {
               continue;
             }
@@ -672,8 +969,14 @@ void findsnp(char ** argv)
             }
           }
         }
-        individual[i].var_flag = 1;
+        int d = (individual[i].quality_depth)*0.001;
+        double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
+        //std::cout << var_pval << '\n';
+        if(var_pval > p_value){
+          continue;
+        }
         if(individual[i].variant_type == "SNP"){
+          individual[i].var_flag = 1;
           var_flag = 1;
           number_of_SNPs++;
         }
@@ -716,10 +1019,14 @@ void findindel(char ** argv)
       char delimiter = '	';
       pileup = split(str, delimiter,pileup);
       int no_of_samples = (pileup.size() - 3)/3;
-      if(vcf_header_flag == 0)
+      #pragma omp critical
       {
-        vcf_header_flag = 1;
-        vcf_Header(min_avg_qual,no_of_samples);
+        if(vcf_header_flag == 0)
+        {
+          vcf_header_flag = 1;
+          vcf_Header(min_avg_qual,no_of_samples);
+        }
+
       }
       int i;
       vector <data> individual(no_of_samples);
@@ -750,7 +1057,7 @@ void findindel(char ** argv)
             float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
             float temp = float(Var_allele_count)/float(individual[i].quality_depth);
             //std::cout << strandedness << '\n';
-            if(strandedness < 0.1 || strandedness > 0.9 )
+            if(strand_filter && (strandedness < 0.1 || strandedness > 0.9) )
             {
               continue;
             }
@@ -769,10 +1076,14 @@ void findindel(char ** argv)
             }
           }
         }
-        individual[i].var_flag = 1;
+        int d = (individual[i].quality_depth)*0.001;
+        double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
+        if(var_pval > p_value){
+          continue;
+        }
         if(individual[i].variant_type == "INS" ||individual[i].variant_type == "DEL"){
+          individual[i].var_flag = 1;
           var_flag = 1;
-          number_of_SNPs++;
         }
       }
       if(var_flag)
@@ -801,6 +1112,7 @@ void findgermline(char ** argv)
           sstop = 1;
           //break;
         }
+
       }
       if(sstop){
         #pragma omp flush(sstop)
@@ -813,10 +1125,14 @@ void findgermline(char ** argv)
       pileup = split(str, delimiter,pileup);
       //std::cout << pileup.size() << '\n';
       int no_of_samples = (pileup.size() - 3)/3;
-      if(vcf_header_flag == 0)
+      #pragma omp critical
       {
-        vcf_header_flag = 1;
-        vcf_Header(min_avg_qual,no_of_samples);
+        if(vcf_header_flag == 0)
+        {
+          vcf_header_flag = 1;
+          vcf_Header(min_avg_qual,no_of_samples);
+        }
+
       }
       int i;
       vector <data> individual(no_of_samples);
@@ -846,7 +1162,7 @@ void findgermline(char ** argv)
           {
             float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
             float temp = float(Var_allele_count)/float(individual[i].quality_depth);
-            if(strandedness < 0.1 || strandedness > 0.9 )
+            if(strand_filter && (strandedness < 0.1 || strandedness > 0.9))
             {
               continue;
             }
@@ -864,6 +1180,11 @@ void findgermline(char ** argv)
             }
           }
         }
+        int d = (individual[i].quality_depth)*0.001;
+        double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
+        if(var_pval > p_value){
+          continue;
+        }
         individual[i].var_flag = 1;
         var_flag = 1;
         number_of_SNPs++;
@@ -878,11 +1199,123 @@ void findgermline(char ** argv)
   }
 }
 
+void findSomatic(char ** argv)
+{
+  std::ifstream file(argv[2]);
+  std::string str;
+  int number_of_SNPs=0;
+  bool vcf_header_flag = 0;
+  int sstop = 0;
+  //omp_set_num_threads(4);
+  #pragma omp parallel private(str)
+  {
+    while(!sstop)
+    {
+      #pragma omp critical
+      {
+        if(!(std::getline(file,str))){
+          sstop = 1;
+          //break;
+        }
+      }
+      if(sstop){
+        #pragma omp flush(sstop)
+      }
+      if(sstop){
+        break;
+      }
+      vector<string> pileup;
+      char delimiter = '	';
+      pileup = split(str, delimiter,pileup);
+      //std::cout << pileup.size() << '\n';
+      int no_of_samples = (pileup.size() - 3)/3;
+      #pragma omp critical
+      {
+        if(vcf_header_flag == 0)
+        {
+          vcf_header_flag = 1;
+          Somatic_vcf_Header(min_avg_qual,no_of_samples);
+        }
+
+      }
+      int i;
+      vector <data> individual(no_of_samples);
+      bool var_flag = 0;
+      //std::cout << pileup[1] << '\n';
+      for(i = 0;i < no_of_samples;i++)
+      {
+        int rawdepth = atoi(pileup[3+3*i].c_str());
+        string bases = pileup[4+3*i];
+        string qualities = pileup[5+3*i];
+        individual[i].setzero();
+        detectvariant(individual[i],bases,qualities,rawdepth);
+        //std::cout << "Quality Depth :" << individual[i].quality_depth << '\n';
+        if(individual[i].quality_depth < min_coverage)
+        {
+          continue;
+        }
+        else
+        {
+          //std::cout << "/* message */" << '\n';
+          int Var_allele_count = 0;
+          Var_allele_count = individual[i].forward_var + individual[i].reverse_var;
+          //std::cout << "Var allele :"<< individual[i].forward_var+individual[i].reverse_var << '\n';
+          if(Var_allele_count < min_reads2)
+          {
+            continue;
+          }
+          else
+          {
+
+            float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
+            float temp = float(Var_allele_count)/float(individual[i].quality_depth);
+            //std::cout << "/* message */" << '\n';
+            if(strand_filter && (strandedness < 0.1 || strandedness > 0.9))
+            {
+              continue;
+            }
+            //std::cout << "/* message */" << '\n';
+            if(temp < min_var_freq)
+            {
+              continue;
+            }
+            else if(temp < min_freq_for_hom)
+            {
+              //std::cout << "/* message */" << '\n';
+              individual[i].is_hetero = 1;
+            }
+            else
+            {
+              individual[i].is_homo = 1;
+            }
+          }
+        }
+        //std::cout << "/* message */" << '\n';
+        int d = (individual[i].quality_depth)*0.001;
+        double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
+        if(var_pval > p_value){
+          continue;
+        }
+        individual[i].var_flag = 1;
+        var_flag = 1;
+        number_of_SNPs++;
+        //std::cout << pileup[1] << '\n';
+      }
+      //std::cout << var_flag << '\n';
+      if(var_flag && individual.size() >=2 && individual[0].quality_depth > min_coverage && individual[1].quality_depth > min_coverage)
+      {
+        Somaticpileuptovcf(pileup,individual);
+      }
+    }
+  }
+}
+
 int main (int argc, char *argv[])
 {
   bool mpileuptosnp = false;
   bool mpileuptoindel = false;
   bool mpileuptogermline = false;
+  bool mpileuptosomatic = false;
   if(strcmp(argv[1],"SNP") == 0)
   {
     mpileuptosnp = true;
@@ -894,6 +1327,10 @@ int main (int argc, char *argv[])
   else if(strcmp(argv[1],"BOTH") == 0)
   {
     mpileuptogermline = true;
+  }
+  else if(strcmp(argv[1],"SOM") == 0)
+  {
+    mpileuptosomatic = true;
   }
   for(int i=3;i< argc;)
   {
@@ -932,6 +1369,11 @@ int main (int argc, char *argv[])
       strand_filter = atoi(argv[i+1]);
       i += 2;
     }
+    else if (strcmp(argv[i],"--somatic-p-value") == 0)
+    {
+      somatic_p_value = atof(argv[i+1]);
+      i += 2;
+    }
     else
     {
       cout << argv[i] << "  Command not found" << endl;
@@ -949,6 +1391,9 @@ int main (int argc, char *argv[])
   }
   else if (mpileuptogermline){
     findgermline(argv);
+  }
+  else if(mpileuptosomatic){
+    findSomatic(argv);
   }
   return 0;
 }
