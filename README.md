@@ -6,7 +6,8 @@ Sequence Variants Identification and Annotation Pipeline
 Please add the following tools to your PATH variable 
 * samtools ([link](https://sourceforge.net/projects/samtools/))
 * bedtools (>=2.26) ([link](http://bedtools.readthedocs.org/en/latest/content/installation.html))
-* R-packages - VariantAnnotation, rfPred, dplyr, tidyr, SNPlocs.Hsapiens.dbSNP144.GRCh37
+* R-packages - dplyr, tidyr 
+* Bioconductor packages - VariantAnnotation, rfPred, SNPlocs.Hsapiens.dbSNP144.GRCh37
 
 ## Installation
 Download the source code from https://github.com/sampreeth13/seqvita, extract the zip file
@@ -14,7 +15,7 @@ Download the source code from https://github.com/sampreeth13/seqvita, extract th
 ```
 unzip SeqVItA.zip
 cd SeqVItA
-make 
+
 ```
 ## Usage
 
