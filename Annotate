@@ -1,0 +1,23 @@
+#!/bin/bash
+
+shopt -s extglob
+
+# Required Options
+input_file="";
+output_file="";
+
+SOURCEDIR=$(dirname $(readlink -f $0))
+
+while [ -n "$1" ]
+do
+  case "$1" in
+  	-i) input_file="$2"
+    shift;;
+    -o) output_file="$2"
+    shift;;
+    *) echo "You have entered an invalid option: -$1";;
+  esac
+  shift
+done
+
+Rscript $SOURCEDIR/source/Annotation.R  $SOURCEDIR/annotations/ $input_file $output_file

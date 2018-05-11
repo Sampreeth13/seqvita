@@ -3,7 +3,7 @@ suppressPackageStartupMessages(library(VariantAnnotation))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(rfPred))
 arg <- commandArgs(trailingOnly = TRUE)
-txdb <- suppressWarnings(makeTxDbFromGFF(file=arg[1],format="gtf"))
+txdb <- suppressWarnings(makeTxDbFromGFF(file=paste(arg[1],"hg19_refGene.gtf",sep=""),format="gtf"))
 vcf <- suppressWarnings(readVcf(arg[2], "hg19"))
 if(identical(intersect(seqlevels(vcf),seqlevels(txdb)),character(0))){
   if(identical(intersect(seqlevels(vcf),"1"),character(0))){
@@ -13,7 +13,7 @@ if(identical(intersect(seqlevels(vcf),seqlevels(txdb)),character(0))){
     vcf <- renameSeqlevels(vcf, paste0("chr", seqlevels(vcf)))
   }
 }
-fa <- open(FaFile(arg[3]))
+fa <- open(FaFile(paste(arg[1],"hg19.fa",sep="")))
 coding1 <- suppressWarnings(predictCoding(vcf,txdb,fa))
 final <- data.frame(seqnames=seqnames(coding1),start=start(coding1),ref=coding1$REF,alt=coding1$ALT,type=coding1$CONSEQUENCE,gene_id=coding1$GENEID)
 if(nrow(final) == 0){
@@ -22,14 +22,14 @@ if(nrow(final) == 0){
 test <- final
 final <- test[,c("seqnames","start","ref","alt.value","type","gene_id")]
 ans <- unique(final)
-genes = fread("../Liver_Cancer/ENS_ID_to_GENE")
+genes = fread(paste(arg[1],"ENS_ID_to_GENE",sep=""))
 colnames(genes) = c("ENSID","gene_name")
 ans = merge(x=ans,y=genes,by.x=c("gene_id"),by.y=c("ENSID"),all.x=TRUE)
 ans = ans[,c(2:ncol(ans))]
 ans= ans[order(ans$seqnames,ans$start),]
 ans$seqnames<-gsub("chr(*)","\\1",ans$seqnames)
 if(nrow(ans) > 0){
-  test <-  rfPred_scores(variant_list = ans[1:4],data=arg[4],index=arg[5],all.col = TRUE)
+  test <-  rfPred_scores(variant_list = ans[1:4],data=paste(arg[1],"all_chr_rfPred.txtz",sep=""),index=paste(arg[1],"all_chr_rfPred.txtz.tbi",sep=""),all.col = TRUE)
   p <- merge(x=ans,y=test,by.x=c("seqnames", "start","gene_name"),by.y=c("chromosome","position_hg19","genename"),all.x=TRUE)
   q<-p[with(p,order(start)), ]
   r<-q[,c("seqnames","start","ref","alt.value","type","gene_name","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
@@ -79,11 +79,12 @@ d <- merge(x=c,y=r,by.x=c("seqnames","start","gene_name"),by.y=c("seqnames","sta
 e <- d[,c("seqnames","start","REF","ALT.value","location","gene_name","PRECEDEID","FOLLOWID","type","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
 e <- unique(e)
 suppressPackageStartupMessages(library(tidyr))
-kgp = fread("../Liver_Cancer/clinVar_variants_hg19")
+kgp = fread(paste(arg[1],"clinVar_variants_hg19",sep=""))
 test = kgp %>% separate(name, into = c("ref","alt"), sep='>')
 clinvar = test[,c("#chrom","chromEnd","ref","alt","clinSign","phenotypeList")]
 e = merge(x=e,y=clinvar,by.x=c("seqnames","start","REF","ALT.value"),by.y=c("#chrom","chromEnd","ref","alt"),all.x=TRUE)
-cosmic = fread("../Liver_Cancer/cosmic_with_chr.vcf")
+
+cosmic = fread(paste(arg[1],"cosmic_with_chr.vcf",sep=""))
 cosmic = cosmic[,c("#CHROM","POS","ID","REF","ALT")]
 colnames(cosmic) = c("CHROM","POS","Cosmic_Ids","REF","ALT")
 map = e[,c("seqnames","start","REF","ALT.value")]
@@ -92,11 +93,13 @@ map = merge(x=map,y=cosmic,by.x=c("seqnames","start","REF","ALT.value"),by.y=c("
 map = as.data.frame(map)
 map <- map %>% group_by(seqnames,start,REF,ALT.value) %>% summarise(Cosmic_Ids = toString(Cosmic_Ids)) %>% as.data.frame
 e = merge(x=e,y=map,by.x=c("seqnames","start","REF","ALT.value"),by.y=c("seqnames","start","REF","ALT.value"),all.x=TRUE)
-omim  = read.csv("../Liver_Cancer/hg19_OMIM",sep="\t",header=FALSE)
+
+omim  = read.csv(paste(arg[1],"hg19_OMIM",sep=""),sep="\t",header=FALSE)
 colnames(omim) = c("CHROM","start","end","OMIM_ID")
 omim = omim[,c("CHROM","start","OMIM_ID")]
 e = merge(x=e,y=omim,by.x = c("seqnames","start"),by.y=c("CHROM","start"),all.x=TRUE)
-decipher  = fread("../Liver_Cancer/hg19_DECIPHER")
+
+decipher  = fread(paste(arg[1],"hg19_DECIPHER",sep=""))
 colnames(decipher) = c("CHROM","start","end","Decipher_values")
 decipher = decipher %>% separate(Decipher_values, into = c("Gene_name","Decipher_val_1","Decipher_val_2"), sep='[|]')
 map_decipher = e[,c("seqnames","start","REF","ALT.value")]
@@ -107,6 +110,7 @@ olaps = suppressWarnings(findOverlaps(ivar,ideci))
 decipher_results = cbind(map_decipher[queryHits(olaps),],decipher[subjectHits(olaps),])
 map_decipher = as.data.frame(decipher_results[,c("seqnames","start","REF","ALT.value","Gene_name","Decipher_val_1","Decipher_val_2")])
 e = merge(x=e,y=map_decipher,by.x=c("seqnames","start","REF","ALT.value","gene_name"),by.y=c("seqnames","start","REF","ALT.value","Gene_name"),all.x=TRUE)
+
 library(SNPlocs.Hsapiens.dbSNP144.GRCh37)
 snps <- SNPlocs.Hsapiens.dbSNP144.GRCh37
 map_dbsnp =  e[,c("seqnames","start","REF","ALT.value")]
@@ -117,12 +121,14 @@ test=suppressWarnings(snpsByOverlaps(snps,ivar,drop.rs.prefix=FALSE))
 dbsnp = data.frame(seqnames=seqnames(test),start=pos(test),dbsnp_id=test$RefSNP_id)
 dbsnp$seqnames <- paste("chr",dbsnp$seqnames,sep="")
 e = merge(x=e,y=dbsnp,by.x=c("seqnames","start"),by.y=c("seqnames","start"),all.x=TRUE)
-pgkb = fread("../Liver_Cancer/pharmGKB.tsv")
+
+pgkb = fread(paste(arg[1],"pharmGKB.tsv",sep=""))
 pgkb = pgkb[,c(2:5)]
 colnames(pgkb) = c("gene","pgkb_type","pgkb_level","pgkb_chemicals")
 e = merge(x=e,y=pgkb,by.x=c("gene_name"),by.y=c("gene"),all.x=TRUE)
 e = e[,c(2:5,1,6:ncol(e))]
 e=e[order(e$seqnames,e$start),]
+
 f = as.data.frame(e)
 f %>% mutate_if(is.factor,as.character) -> f
 f[is.na(f)]<- "."
@@ -203,4 +209,4 @@ if(nrow(f)>0){
     f[i,"Priority"] = priority
   }
 }
-write.table(f, file=arg[6], quote=F, sep="\t", row.names=F, col.names=T)
+write.table(f, file=arg[3], quote=F, sep="\t", row.names=F, col.names=T)
