@@ -42,6 +42,6 @@ make
 
 # VARIANT ANNOTATION
 
-./annotate -i Test.vcf -o Output
+./annotate -i Test.vcf --geneBasedDrug -o Output [Default:Variant based (rs ID) drug mapping]
 
 ```
