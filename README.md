@@ -20,13 +20,28 @@ make
 
 ```
 # VARIANT CALLING FROM ALIGNMENT FILE
-
+./variantCalling snp -ib Test.bam -r hg19.fa -o output.vcf
+./variantCalling indel -i Test.bam ....
+./variantCalling germline -i Test.bam
+./variantCalling somatic --normal normal.bam --tumor tumor.bam ...
 
 # VARIANT CALLING FROM MPILEUP FILE
 
+./variantCalling snp -im Test.mpileup -o output.vcf
+./variantCalling indel -i Test.mpileup ....
+./variantCalling germline -i Test.mpileup
+./variantCalling somatic --normal normal.mpileup --tumor tumor.mpileup ...
+
 # VARIANT CALLING FROM WES/TS FILES
+
+./variantCalling snp -ib Test.bam -r hg19.fa --bed Coordinate_file -o output.vcf
+./variantCalling indel -i Test.bam --bed Coordinate_file ....
+./variantCalling germline -i Test.bam --bed Coordinate_file
+./variantCalling somatic --normal normal.bam --tumor tumor.bam --bed Coordinate_file ...
+
 
 # VARIANT ANNOTATION
 
+./annotate -i Test.vcf -o Output
 
 ```
