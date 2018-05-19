@@ -404,7 +404,7 @@ void Somaticpileuptovcf(std::vector<string> &pileup, std::vector<data>  &individ
   stringstream aa;
   aa << std::scientific;
   aa << var_pval << std::endl;
-  string pvalstr =ss.str();
+  string pvalstr =aa.str();
   pvalstr.pop_back();
   vcf_line += "SS=" + somatic_status + ";CONF=" + conf + ";SPV=" + spvalstr + ";VPV=" + pvalstr;
 
