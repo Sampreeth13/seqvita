@@ -15,12 +15,13 @@ if(identical(intersect(seqlevels(vcf),seqlevels(txdb)),character(0))){
 }
 fa <- open(FaFile(paste(arg[1],"hg19.fa",sep="")))
 coding1 <- suppressWarnings(predictCoding(vcf,txdb,fa))
-final <- data.frame(seqnames=seqnames(coding1),start=start(coding1),ref=coding1$REF,alt=coding1$ALT,type=coding1$CONSEQUENCE,gene_id=coding1$GENEID)
+final <- data.frame(seqnames=seqnames(coding1),start=start(coding1),ref=coding1$REF,alt=coding1$ALT,type=coding1$CONSEQUENCE,gene_id=coding1$GENEID,protien_loc=coding1$PROTEINLOC,refaa=coding1$REFAA,varaa=coding1$VARAA)
 if(nrow(final) == 0){
   final$type <- numeric(nrow(final))
 }
+final$AA_Change=paste(final$refaa,final$protien_loc.value,final$varaa,sep="")
 test <- final
-final <- test[,c("seqnames","start","ref","alt.value","type","gene_id")]
+final <- test[,c("seqnames","start","ref","alt.value","type","gene_id","AA_Change")]
 ans <- unique(final)
 genes = fread(paste(arg[1],"ENS_ID_to_GENE",sep=""))
 colnames(genes) = c("ENSID","gene_name")
@@ -32,10 +33,10 @@ if(nrow(ans) > 0){
   test <-  rfPred_scores(variant_list = ans[1:4],data=paste(arg[1],"all_chr_rfPred.txtz",sep=""),index=paste(arg[1],"all_chr_rfPred.txtz.tbi",sep=""),all.col = TRUE)
   p <- merge(x=ans,y=test,by.x=c("seqnames", "start","gene_name"),by.y=c("chromosome","position_hg19","genename"),all.x=TRUE)
   q<-p[with(p,order(start)), ]
-  r<-q[,c("seqnames","start","ref","alt.value","type","gene_name","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
+  r<-q[,c("seqnames","start","ref","alt.value","type","gene_name","AA_Change","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
   r$seqnames <- paste("chr",r$seqnames,sep="")
 }else{
-  r = data.frame(seqnames=character(),start=character(),ref=character(),alt.value=character(),type=character(),gene_name=character(),SIFT_score=character(),Polyphen2_score=character(),MutationTaster_score=character(),PhyloP_score=character(),"LRT_score"=character())
+  r = data.frame(seqnames=character(),start=character(),ref=character(),alt.value=character(),type=character(),gene_name=character(),AA_Change=character(),SIFT_score=character(),Polyphen2_score=character(),MutationTaster_score=character(),PhyloP_score=character(),"LRT_score"=character())
 }
 loc_all <- suppressWarnings(locateVariants(vcf, txdb, AllVariants()))
 final1 <- data.frame(seqnames=seqnames(loc_all),start=start(loc_all),location=loc_all$LOCATION,gene_id=loc_all$GENEID,QUERYID=loc_all$QUERYID)
@@ -76,7 +77,7 @@ b <- merge(x=a,y=var1,by.x=c("seqnames", "start"),by.y=c("seqnames","start"),all
 new <- b[order(b$QUERYID),]
 c <- new[,c("seqnames","start","REF","ALT.value","location","gene_name","PRECEDEID","FOLLOWID")]
 d <- merge(x=c,y=r,by.x=c("seqnames","start","gene_name"),by.y=c("seqnames","start","gene_name"),all.x=TRUE)
-e <- d[,c("seqnames","start","REF","ALT.value","location","gene_name","PRECEDEID","FOLLOWID","type","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
+e <- d[,c("seqnames","start","REF","ALT.value","location","gene_name","PRECEDEID","FOLLOWID","type","AA_Change","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
 e <- unique(e)
 suppressPackageStartupMessages(library(tidyr))
 kgp = fread(paste(arg[1],"clinVar_variants_hg19",sep=""))
@@ -96,8 +97,8 @@ e = merge(x=e,y=map,by.x=c("seqnames","start","REF","ALT.value"),by.y=c("seqname
 
 omim  = read.csv(paste(arg[1],"hg19_OMIM",sep=""),sep="\t",header=FALSE)
 colnames(omim) = c("CHROM","start","end","OMIM_ID")
-omim = omim[,c("CHROM","start","OMIM_ID")]
-e = merge(x=e,y=omim,by.x = c("seqnames","start"),by.y=c("CHROM","start"),all.x=TRUE)
+omim = omim[,c("CHROM","end","OMIM_ID")]
+e = merge(x=e,y=omim,by.x = c("seqnames","start"),by.y=c("CHROM","end"),all.x=TRUE)
 
 decipher  = fread(paste(arg[1],"hg19_DECIPHER",sep=""))
 colnames(decipher) = c("CHROM","start","end","Decipher_values")
@@ -134,7 +135,7 @@ f %>% mutate_if(is.factor,as.character) -> f
 f[is.na(f)]<- "."
 if(nrow(f)>0){
   for(i in 1:nrow(f))
-  { 
+  {
     if(identical(f[i,"PRECEDEID"],"NA")){
       f[i,"PRECEDEID"] = "."
     }
@@ -190,8 +191,8 @@ if(nrow(f)>0){
     }
     if(identical(clinical_priority,0)){
       clinical_priority = 1
-    } 
-    drug_priority = 1  
+    }
+    drug_priority = 1
     if(!identical(f[i,"pgkb_type"],".")){
       drug_priority = 3
     }
