@@ -1,0 +1,94 @@
+seqnames	start	REF	ALT.value	gene_name	location	PRECEDEID	FOLLOWID	type	AA_Change	SIFT_score	Polyphen2_score	MutationTaster_score	PhyloP_score	LRT_score	clinSign	phenotypeList	Cosmic_Ids	OMIM_ID	Decipher_val_1	Decipher_val_2	dbsnp_id	pgkb_type	pgkb_level	pgkb_chemicals	Priority
+chr1	11318763	C	G	MTOR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.997612705	0.59%	rs2076657	.	.	.	Low
+chr1	17371152	T	C	SDHB	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.616900215	11.22%	rs12073028	.	.	.	Low
+chr1	161518618	G	A	FCGR3A	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.001574377	92.43%	rs199526142	Efficacy	3	cetuximab	Medium
+chr1	161518618	G	A	FCGR3A	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.001574377	92.43%	rs199526142	Efficacy	3	adalimumab,etanercept,infliximab	Medium
+chr1	161518618	G	A	FCGR3A	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.001574377	92.43%	rs199526142	Efficacy	2B	rituximab	Medium
+chr1	161518618	G	A	FCGR3A	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.001574377	92.43%	rs199526142	Efficacy	3	rituximab	Medium
+chr1	161518618	G	A	FCGR3A	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.001574377	92.43%	rs199526142	Other	3	antithymocyte globulin	Medium
+chr1	161518618	G	A	FCGR3A	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.001574377	92.43%	rs199526142	Efficacy	2B	trastuzumab	Medium
+chr1	161518618	G	A	FCGR3A	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.001574377	92.43%	rs199526142	Efficacy	3	infliximab	Medium
+chr1	161518618	G	A	RP11-25K21.6	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs199526142	.	.	.	Low
+chr1	161640095	C	T	FCGR2B	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.005666385	85.02%	rs922087	.	.	.	Low
+chr1	161640095	C	T	FCGR2B	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.005666385	85.02%	rs138321848	.	.	.	Low
+chr1	161643889	G	T	FCGR2B	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.005666385	85.02%	rs6666965	.	.	.	Low
+chr1	161643889	G	T	FCGR2B	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.005666385	85.02%	rs140558259	.	.	.	Low
+chr1	161643889	G	T	RP11-25K21.1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs6666965	.	.	.	Low
+chr1	161643889	G	T	RP11-25K21.1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs140558259	.	.	.	Low
+chr2	131949073	G	C	PLEKHB2	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.091599144	52.9%	rs12613444	.	.	.	Low
+chr3	47059323	C	T	SETD2	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.695117381	8.64%	rs2385867	.	.	.	Low
+chr3	89498619	A	G	EPHA3	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.89570025	3.51%	rs1028011	.	.	.	Low
+chr3	178942431	C	G	PIK3CA	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.99977008	0.26%	rs2699889	Toxicity/ADR	3	carboplatin,cisplatin	Medium
+chr3	178942431	C	G	PIK3CA	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.99977008	0.26%	rs2699889	Dosage	4	docetaxel	Medium
+chr4	55125058	A	T	FIP1L1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.803179019	5.74%	rs2303430	.	.	.	Low
+chr4	55125058	A	T	PDGFRA	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.732814816	7.55%	rs2303430	.	.	.	Low
+chr4	55599436	T	C	KIT	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.689603428	8.78%	rs1008658	.	.	.	Low
+chr4	55946439	G	A	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs117341472	Efficacy	3	sorafenib	Medium
+chr4	55946439	G	A	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs117341472	Efficacy	3	sorafenib	Medium
+chr4	55946439	G	A	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs117341472	Toxicity/ADR	3	sorafenib	Medium
+chr4	55946439	G	A	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs117341472	Efficacy	3	sorafenib	Medium
+chr4	55946439	G	A	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs117341472	Efficacy,Metabolism/PK	3	pazopanib	Medium
+chr4	55946439	G	A	RP11-530I17.1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs117341472	.	.	.	Low
+chr4	55955232	T	C	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs1531289	Efficacy	3	sorafenib	Medium
+chr4	55955232	T	C	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs1531289	Efficacy	3	sorafenib	Medium
+chr4	55955232	T	C	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs1531289	Toxicity/ADR	3	sorafenib	Medium
+chr4	55955232	T	C	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs1531289	Efficacy	3	sorafenib	Medium
+chr4	55955232	T	C	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs1531289	Efficacy,Metabolism/PK	3	pazopanib	Medium
+chr4	55955232	T	C	RP11-530I17.1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs1531289	.	.	.	Low
+chr4	55964605	C	T	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Efficacy	3	sorafenib	Medium
+chr4	55964605	C	T	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Efficacy	3	sorafenib	Medium
+chr4	55964605	C	T	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Toxicity/ADR	3	sorafenib	Medium
+chr4	55964605	C	T	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Efficacy	3	sorafenib	Medium
+chr4	55964605	C	T	KDR	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Efficacy,Metabolism/PK	3	pazopanib	Medium
+chr4	55964605	C	T	KDR	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Efficacy	3	sorafenib	Medium
+chr4	55964605	C	T	KDR	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Efficacy	3	sorafenib	Medium
+chr4	55964605	C	T	KDR	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Toxicity/ADR	3	sorafenib	Medium
+chr4	55964605	C	T	KDR	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Efficacy	3	sorafenib	Medium
+chr4	55964605	C	T	KDR	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	0.951226696	2.22%	rs2305946	Efficacy,Metabolism/PK	3	pazopanib	Medium
+chr5	149513017	G	A	PDGFRB	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.916746398	3.06%	rs143166351	.	.	.	Low
+chr7	14021157	C	T	ETV1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.91874475	3.01%	rs74486293	.	.	.	Low
+chr7	14024547	C	T	ETV1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.91874475	3.01%	rs56062957	.	.	.	Low
+chr7	116421967	T	C	MET	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.987477755	1.18%	rs6947629	.	.	.	Low
+chr7	151932876	G	T	KMT2C	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.088346598	53.58%	rs74977767	.	.	.	Low
+chr8	93027008	G	A	RUNX1T1	intron	.	.	synonymous	G52G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	coding	.	.	synonymous	G100G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	intron	.	.	synonymous	G89G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	intron	.	.	synonymous	G100G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	coding	.	.	synonymous	G62G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	threeUTR	.	.	synonymous	G89G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	coding	.	.	synonymous	G89G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	coding	.	.	synonymous	G52G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	threeUTR	.	.	synonymous	G52G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	threeUTR	.	.	synonymous	G100G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	intron	.	.	synonymous	G62G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr8	93027008	G	A	RUNX1T1	threeUTR	.	.	synonymous	G62G	.	.	.	.	.	.	.	COSM1169155, COSM1169153, COSM1169154	.	0.998431408	0.5%	rs144377527	.	.	.	Medium
+chr9	5069837	G	A	JAK2	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.99507323	0.83%	rs7869668	.	.	.	Low
+chr9	5090966	ATTG	A	JAK2	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.99507323	0.83%	.	.	.	.	Low
+chr9	5090966	ATTG	A	MTND6P5	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	Low
+chr9	5122932	A	G	JAK2	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.99507323	0.83%	rs10815163	.	.	.	Low
+chr10	43600689	A	G	RET	intron	.	.	.	.	.	.	.	.	.	Benign	not specified	.	.	0.976360102	1.58%	rs2435352	.	.	.	Medium
+chr10	123263616	C	T	FGFR2	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.998388411	0.5%	rs3135772	.	.	.	Low
+chr11	119155618	G	T	CBL	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.892719131	3.6%	rs2298650	.	.	.	Low
+chr11	125497466	G	T	CHEK1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.91353467	3.14%	rs491528	.	.	.	Low
+chr12	442620	C	T	KDM5A	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.438087268	18.78%	rs4980885	.	.	.	Low
+chr12	6691559	G	A	CHD4	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.655772163	9.88%	rs2267970	.	.	.	Low
+chr12	6691559	G	A	CHD4	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	0.655772163	9.88%	rs2267970	.	.	.	Low
+chr12	6691559	G	A	RP5-940J5.6	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs2267970	.	.	.	Low
+chr12	6691559	G	A	SCARNA11	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs2267970	.	.	.	Low
+chr13	28589509	C	T	FLT3	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	0.691934663	8.71%	rs9579143	Toxicity/ADR	2B	sunitinib	Medium
+chr13	28589509	C	T	FLT3	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.691934663	8.71%	rs9579143	Toxicity/ADR	2B	sunitinib	Medium
+chr13	29001714	A	T	FLT1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.896227034	3.5%	rs17086671	.	.	.	Low
+chr13	29001721	C	T	FLT1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.896227034	3.5%	rs2281827	.	.	.	Low
+chr14	19490696	C	T	NF1P4	spliceSite	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs762796728	.	.	.	Low
+chr14	19490696	C	T	NF1P4	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs762796728	.	.	.	Low
+chr14	65568215	G	A	MAX	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	0.956378076	2.06%	rs2781373	.	.	.	Low
+chr14	65568215	G	A	MAX	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.956378076	2.06%	rs2781373	.	.	.	Low
+chr16	33373382	G	A	RP11-23E10.4	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs140558509	.	.	.	Low
+chr17	15977005	A	T	NCOR1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.942283614	2.42%	rs11078330	.	.	.	Low
+chr17	15977043	C	T	NCOR1	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	0.942283614	2.42%	rs9896441	.	.	.	Low
+chr17	17122327	G	A	FLCN	intron	.	.	.	.	.	.	.	.	.	.	.	COSM5019371	.	0.129066067	46.02%	rs8065832	.	.	.	Medium
+chr17	17122327	G	A	FLCN	promoter	.	.	.	.	.	.	.	.	.	.	.	COSM5019371	.	0.129066067	46.02%	rs8065832	.	.	.	Medium
+chr17	17122327	G	A	RP11-45M22.4	intron	.	.	.	.	.	.	.	.	.	.	.	COSM5019371	.	.	.	rs8065832	.	.	.	Low
+chr22	16984302	T	A	CHEK2P4	intron	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs28537905	.	.	.	Low
+chr22	16984302	T	A	CHEK2P4	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	rs28537905	.	.	.	Low
+chr21	11029630	GC	G	TPTE	promoter	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	.	Low

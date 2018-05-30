@@ -14,14 +14,15 @@ if(identical(intersect(seqlevels(vcf),seqlevels(txdb)),character(0))){
   }
 }
 fa <- open(FaFile(paste(arg[1],"hg19.fa",sep="")))
-coding1 <- suppressWarnings(predictCoding(vcf,txdb,fa))
-final <- data.frame(seqnames=seqnames(coding1),start=start(coding1),ref=coding1$REF,alt=coding1$ALT,type=coding1$CONSEQUENCE,gene_id=coding1$GENEID,protien_loc=coding1$PROTEINLOC,refaa=coding1$REFAA,varaa=coding1$VARAA)
+coding1 <- data.frame(suppressWarnings(predictCoding(vcf,txdb,fa)))
+final <- data.frame(seqnames=coding1$seqnames,start=coding1$start,ref=coding1$REF,alt=coding1$ALT,type=coding1$CONSEQUENCE,gene_id=coding1$GENEID,protien_loc=coding1$PROTEINLOC,refaa=coding1$REFAA,varaa=coding1$VARAA)
 if(nrow(final) == 0){
   final$type <- numeric(nrow(final))
 }
-final$AA_Change=paste(final$refaa,final$protien_loc.value,final$varaa,sep="")
+final$AA_Change=paste(final$refaa,final$protien_loc,final$varaa,sep="")
+final$type = as.character(final$type)
 test <- final
-final <- test[,c("seqnames","start","ref","alt.value","type","gene_id","AA_Change")]
+final <- test[,c("seqnames","start","ref","alt","type","gene_id","AA_Change")]
 ans <- unique(final)
 genes = fread(paste(arg[1],"ENS_ID_to_GENE",sep=""))
 colnames(genes) = c("ENSID","gene_name")
@@ -33,7 +34,7 @@ if(nrow(ans) > 0){
   test <-  rfPred_scores(variant_list = ans[1:4],data=paste(arg[1],"all_chr_rfPred.txtz",sep=""),index=paste(arg[1],"all_chr_rfPred.txtz.tbi",sep=""),all.col = TRUE)
   p <- merge(x=ans,y=test,by.x=c("seqnames", "start","gene_name"),by.y=c("chromosome","position_hg19","genename"),all.x=TRUE)
   q<-p[with(p,order(start)), ]
-  r<-q[,c("seqnames","start","ref","alt.value","type","gene_name","AA_Change","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
+  r<-q[,c("seqnames","start","ref","alt","type","gene_name","AA_Change","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
   r$seqnames <- paste("chr",r$seqnames,sep="")
 }else{
   r = data.frame(seqnames=character(),start=character(),ref=character(),alt.value=character(),type=character(),gene_name=character(),AA_Change=character(),SIFT_score=character(),Polyphen2_score=character(),MutationTaster_score=character(),PhyloP_score=character(),"LRT_score"=character())
@@ -141,6 +142,9 @@ if(nrow(f)>0){
     }
     if(identical(f[i,"FOLLOWID"],"NA")){
       f[i,"FOLLOWID"] = "."
+    }
+    if(identical(f[i,"type"],"frameshift")){
+      f[i,"AA_Change"] = "."
     }
     functional_score = suppressWarnings(as.numeric(f[i,"SIFT_score"]) + as.numeric(f[i,"Polyphen2_score"]) + as.numeric(f[i,"MutationTaster_score"]) + as.numeric(f[i,"PhyloP_score"]) + as.numeric(f[i,"LRT_score"]))
     if(identical(f[i,"SIFT_score"],"NA")){
