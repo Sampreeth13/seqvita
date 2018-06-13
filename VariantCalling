@@ -86,22 +86,23 @@ done
 #done
 #echo $input_file
 
-if [ $reference_file!="" && $bed_file!="" ]; then
-  if [ $normal_file!="" && $tumor_file!="" ]; then
+if [[ $reference_file != "" && $bed_file != "" ]]; then
+  if [[ $normal_file != "" && $tumor_file != "" ]]; then
     samtools mpileup -f $reference_file -B $normal_file $tumor_file --positions $bed_file > $output_file.mpileup
     $SOURCEDIR/seqvita $variant_calling_type ./$output_file.mpileup --min-coverage $min_coverage --min-reads2 $min_reads2 --min-avg-qual $min_avg_qual --min-var-freq $min_var_freq --min-freq-for-hom $min_freq_for_hom --p-value $p_value --strand-filter $strand_filter > $output_file.vcf
   else
     samtools mpileup -f $reference_file -B $bam_file --positions $bed_file > $output_file.mpileup
   fi
-elif [ $reference_file!="" ]; then
-  if [ $normal_file!="" && $tumor_file!="" ]; then
+elif [[ $reference_file != "" ]]; then
+  if [[ $normal_file!="" && $tumor_file!="" ]]; then
     samtools mpileup -f $reference_file -B $normal_file $tumor_file  > $output_file.mpileup
     $SOURCEDIR/seqvita $variant_calling_type ./$output_file.mpileup --min-coverage $min_coverage --min-reads2 $min_reads2 --min-avg-qual $min_avg_qual --min-var-freq $min_var_freq --min-freq-for-hom $min_freq_for_hom --p-value $p_value --strand-filter $strand_filter > $output_file.vcf
   else
     samtools mpileup -f $reference_file -B $bam_file > $output_file.mpileup
+    $SOURCEDIR/seqvita $variant_calling_type ./$output_file.mpileup --min-coverage $min_coverage --min-reads2 $min_reads2 --min-avg-qual $min_avg_qual --min-var-freq $min_var_freq --min-freq-for-hom $min_freq_for_hom --p-value $p_value --strand-filter $strand_filter > $output_file.vcf
   fi
 else
-  $SOURCEDIR/seqvita $variant_calling_type ./$output_file.mpileup --min-coverage $min_coverage --min-reads2 $min_reads2 --min-avg-qual $min_avg_qual --min-var-freq $min_var_freq --min-freq-for-hom $min_freq_for_hom --p-value $p_value --strand-filter $strand_filter > $output_file.vcf
+  $SOURCEDIR/seqvita $variant_calling_type $input_file --min-coverage $min_coverage --min-reads2 $min_reads2 --min-avg-qual $min_avg_qual --min-var-freq $min_var_freq --min-freq-for-hom $min_freq_for_hom --p-value $p_value --strand-filter $strand_filter > $output_file.vcf
 fi
 
 #samtools mpileup -f $reference_file -B $input_file > $output_file.mpileup
