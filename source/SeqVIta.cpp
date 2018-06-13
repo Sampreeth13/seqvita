@@ -399,12 +399,14 @@ void Somaticpileuptovcf(std::vector<string> &pileup, std::vector<data>  &individ
   ss << som_p_val << std::endl;
   string spvalstr =ss.str();
   spvalstr.pop_back();
-  int d = (individual[0].quality_depth+individual[1].quality_depth)*0.001;
-  double var_pval = fisher_test(individual[1].forward_ref + individual[1].reverse_ref+individual[0].forward_ref + individual[0].reverse_ref,individual[1].forward_var + individual[1].reverse_var + individual[0].forward_var + individual[0].reverse_var,individual[0].quality_depth+individual[1].quality_depth-d,d);
+  int reference_depth = individual[1].forward_ref + individual[1].reverse_ref+individual[0].forward_ref + individual[0].reverse_ref;
+  int variant_depth = individual[1].forward_var + individual[1].reverse_var + individual[0].forward_var + individual[0].reverse_var;
+  int d = (reference_depth+variant_depth)*0.001;
+  double var_pval = fisher_test(reference_depth,variant_depth,reference_depth+variant_depth-d,d);
   stringstream aa;
   aa << std::scientific;
   aa << var_pval << std::endl;
-  string pvalstr =aa.str();
+  string pvalstr = aa.str();
   pvalstr.pop_back();
   vcf_line += "SS=" + somatic_status + ";CONF=" + conf + ";SPV=" + spvalstr + ";VPV=" + pvalstr;
 
@@ -1269,8 +1271,10 @@ void findindel(char ** argv)
             }
           }
         }
-        int d = (individual[i].quality_depth)*0.001;
-        double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
+        int reference_depth = individual[i].forward_ref+individual[i].reverse_ref;
+        int variant_depth = individual[i].forward_var+individual[i].reverse_var;
+        int d = (reference_depth+variant_depth)*0.001;
+        double var_pval = fisher_test(reference_depth,variant_depth,reference_depth+variant_depth-d,d);
         if(var_pval > p_value){
           continue;
         }
@@ -1373,8 +1377,10 @@ void findgermline(char ** argv)
             }
           }
         }
-        int d = (individual[i].quality_depth)*0.001;
-        double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
+        int reference_depth = individual[i].forward_ref+individual[i].reverse_ref;
+        int variant_depth = individual[i].forward_var+individual[i].reverse_var;
+        int d = (reference_depth+variant_depth)*0.001;
+        double var_pval = fisher_test(reference_depth,variant_depth,reference_depth+variant_depth-d,d);
         if(var_pval > p_value){
           continue;
         }
@@ -1484,8 +1490,10 @@ void findSomatic(char ** argv)
           }
         }
         //std::cout << "/* message */" << '\n';
-        int d = (individual[i].quality_depth)*0.001;
-        double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
+        int reference_depth = individual[i].forward_ref+individual[i].reverse_ref;
+        int variant_depth = individual[i].forward_var+individual[i].reverse_var;
+        int d = (reference_depth+variant_depth)*0.001;
+        double var_pval = fisher_test(reference_depth,variant_depth,reference_depth+variant_depth-d,d);
         if(var_pval > p_value){
           continue;
         }
@@ -1589,8 +1597,10 @@ void findpopulation(char ** argv)
             }
           }
         }
-        int d = (individual[i].quality_depth)*0.001;
-        double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
+        int reference_depth = individual[i].forward_ref+individual[i].reverse_ref;
+        int variant_depth = individual[i].forward_var+individual[i].reverse_var;
+        int d = (reference_depth+variant_depth)*0.001;
+        double var_pval = fisher_test(reference_depth,variant_depth,reference_depth+variant_depth-d,d);
         if(var_pval > p_value){
           continue;
         }
