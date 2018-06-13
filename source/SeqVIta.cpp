@@ -626,16 +626,30 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
       }
       Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
       Genotype += itoa(var_depth) + ":" ;
-      float temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
+      float temp;
+      if(individual[i].quality_depth){
+        temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
+      }
+      else{
+        temp = 0;
+      }
       Genotype += ftoa(float(temp)/100) + "%:" + pvalstr + ":";
-      if(ref_depth)
+      if(ref_depth && var_depth)
       {
         Genotype += itoa(individual[i].quality_ref/ref_depth) + ":" + itoa(individual[i].quality_var/var_depth);
       }
-      else
+      else if(var_depth)
       {
         Genotype += string("0") + ":" + itoa(individual[i].quality_var/var_depth);
       }
+      else if(ref_depth)
+      {
+        Genotype += itoa(individual[i].quality_ref/ref_depth) + ":" + string("0");
+      }
+      else{
+        Genotype += string("0") + ":" + string("0");
+      }
+
       Genotype += ":" + itoa(individual[i].forward_ref) + ":" + itoa(individual[i].reverse_ref) + ":" + itoa(individual[i].forward_var) + ":" + itoa(individual[i].reverse_var);
     }
     else
@@ -655,7 +669,13 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
       }
       Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
       Genotype += itoa(var_depth) + ":" ;
-      float temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
+      float temp;
+      if(individual[i].quality_depth){
+        temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
+      }
+      else{
+        temp = 0;
+      }
       Genotype += ftoa(float(temp)/100) + "%:" + pvalstr + ":";
       if(ref_depth && var_depth)
       {
@@ -665,8 +685,12 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
       {
         Genotype += string("0") + ":" + itoa(individual[i].quality_var/var_depth);
       }
-      else{
+      else if(ref_depth)
+      {
         Genotype += itoa(individual[i].quality_ref/ref_depth) + ":" + string("0");
+      }
+      else{
+        Genotype += string("0") + ":" + string("0");
       }
       Genotype += ":" + itoa(individual[i].forward_ref) + ":" + itoa(individual[i].reverse_ref) + ":" + itoa(individual[i].forward_var) + ":" + itoa(individual[i].reverse_var);
     }
@@ -745,6 +769,7 @@ void Populationpileuptovcf(std::vector<string> &pileup, std::vector<data>  &indi
   }
   for(i = 0;i < no_of_samples;i++)
   {
+    //std::cout << individual[i].var_flag << '\n';
     int ref_depth = individual[i].forward_ref + individual[i].reverse_ref;
     int var_depth = individual[i].forward_var + individual[i].reverse_var;
     Genotype += "\t";
@@ -806,8 +831,14 @@ void Populationpileuptovcf(std::vector<string> &pileup, std::vector<data>  &indi
         GQ = 255;
       }
       Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
-      Genotype += itoa(var_depth) + ":" ;
-      float temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
+      Genotype += itoa(var_depth) + ":";
+      float temp;
+      if(individual[i].quality_depth){
+        temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
+      }
+      else{
+        temp = 0;
+      }
       Genotype += ftoa(float(temp)/100) + "%:" + pvalstr + ":";
       if(ref_depth && var_depth)
       {
@@ -817,9 +848,14 @@ void Populationpileuptovcf(std::vector<string> &pileup, std::vector<data>  &indi
       {
         Genotype += string("0") + ":" + itoa(individual[i].quality_var/var_depth);
       }
-      else{
+      else if(ref_depth)
+      {
         Genotype += itoa(individual[i].quality_ref/ref_depth) + ":" + string("0");
       }
+      else{
+        Genotype += string("0") + ":" + string("0");
+      }
+
       Genotype += ":" + itoa(individual[i].forward_ref) + ":" + itoa(individual[i].reverse_ref) + ":" + itoa(individual[i].forward_var) + ":" + itoa(individual[i].reverse_var);
     }
     total_depth += individual[i].quality_depth;
@@ -1127,7 +1163,12 @@ void findsnp(char ** argv)
         string qualities = pileup[5+3*i];
         individual[i].setzero();
         //std::cout << "Started" << '\n';
-        detectvariant(individual[i],bases,qualities,rawdepth);
+        if(rawdepth > 0){
+          detectvariant(individual[i],bases,qualities,rawdepth);
+        }
+        else{
+          continue;
+        }
         //std::cout << "Ended" << '\n';
         //std::cout << individual[i].quality_depth << '\n';
         if(individual[i].quality_depth < min_coverage)
@@ -1232,7 +1273,12 @@ void findindel(char ** argv)
         string bases = pileup[4+3*i];
         string qualities = pileup[5+3*i];
         individual[i].setzero();
-        detectvariant(individual[i],bases,qualities,rawdepth);
+        if(rawdepth > 0){
+          detectvariant(individual[i],bases,qualities,rawdepth);
+        }
+        else{
+          continue;
+        }
         //std::cout << individual[i].quality_depth << '\n';
         if(individual[i].quality_depth < min_coverage)
         {
@@ -1340,7 +1386,12 @@ void findgermline(char ** argv)
         string bases = pileup[4+3*i];
         string qualities = pileup[5+3*i];
         individual[i].setzero();
-        detectvariant(individual[i],bases,qualities,rawdepth);
+        if(rawdepth > 0){
+          detectvariant(individual[i],bases,qualities,rawdepth);
+        }
+        else{
+          continue;
+        }
         //std::cout << "Quality Depth :" << individual[i].quality_depth << '\n';
         if(individual[i].quality_depth < min_coverage)
         {
@@ -1513,6 +1564,7 @@ void findSomatic(char ** argv)
 
 void findpopulation(char ** argv)
 {
+  //std::cout << "/* message */" << '\n';
   std::ifstream file(argv[2]);
   std::string str;
   int number_of_SNPs=0;
@@ -1540,14 +1592,16 @@ void findpopulation(char ** argv)
       vector<string> pileup;
       char delimiter = '	';
       pileup = split(str, delimiter,pileup);
-      //std::cout << pileup.size() << '\n';
+      //std::cout << pileup[1] << '\n';
       int no_of_samples = (pileup.size() - 3)/3;
       #pragma omp critical
       {
         if(vcf_header_flag == 0)
         {
+          //std::cout << no_of_samples << '\n';
           vcf_header_flag = 1;
           vcf_Header(min_avg_qual,no_of_samples);
+          //std::cout << "/* message */" << '\n';
         }
 
       }
@@ -1560,7 +1614,12 @@ void findpopulation(char ** argv)
         string bases = pileup[4+3*i];
         string qualities = pileup[5+3*i];
         individual[i].setzero();
-        detectvariant(individual[i],bases,qualities,rawdepth);
+        if(rawdepth > 0){
+          detectvariant(individual[i],bases,qualities,rawdepth);
+        }
+        else{
+          continue;
+        }
         //std::cout << "Quality Depth :" << individual[i].quality_depth << '\n';
         if(individual[i].quality_depth < min_coverage)
         {
