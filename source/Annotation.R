@@ -124,12 +124,21 @@ dbsnp = data.frame(seqnames=seqnames(test),start=pos(test),dbsnp_id=test$RefSNP_
 dbsnp$seqnames <- paste("chr",dbsnp$seqnames,sep="")
 e = merge(x=e,y=dbsnp,by.x=c("seqnames","start"),by.y=c("seqnames","start"),all.x=TRUE)
 
-pgkb = fread(paste(arg[1],"pharmGKB.tsv",sep=""))
-pgkb = pgkb[,c(2:5)]
-colnames(pgkb) = c("gene","pgkb_type","pgkb_level","pgkb_chemicals")
-e = merge(x=e,y=pgkb,by.x=c("gene_name"),by.y=c("gene"),all.x=TRUE)
-e = e[,c(2:5,1,6:ncol(e))]
-e=e[order(e$seqnames,e$start),]
+if(identical(arg[4],"genebased")){
+  pgkb = fread(paste(arg[1],"pharmGKB.tsv",sep=""))
+  pgkb = pgkb[,c(2:5)]
+  colnames(pgkb) = c("gene","pgkb_type","pgkb_level","pgkb_chemicals")
+  e = merge(x=e,y=pgkb,by.x=c("gene_name"),by.y=c("gene"),all.x=TRUE)
+  e = e[,c(2:5,22,1,6:21,23:ncol(e))]
+  e=e[order(e$seqnames,e$start),]
+}else{
+  pgkb = fread(paste(arg[1],"pharmGKB.tsv",sep=""))
+  pgkb = pgkb[,c(1,3,4,5)]
+  colnames(pgkb) = c("dbsnp_id","pgkb_type","pgkb_level","pgkb_chemicals")
+  e = merge(x=e,y=pgkb,by.x=c("dbsnp_id"),by.y=c("dbsnp_id"),all.x=TRUE)
+  e = e[,c(2:5,1,6:ncol(e))]
+  e=e[order(e$seqnames,e$start),]
+}
 
 f = as.data.frame(e)
 f %>% mutate_if(is.factor,as.character) -> f

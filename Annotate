@@ -5,7 +5,7 @@ shopt -s extglob
 # Required Options
 input_file="";
 output_file="";
-
+drugoption="dbsnp"
 SOURCEDIR=$(dirname $(readlink -f $0))
 
 while [ -n "$1" ]
@@ -15,9 +15,11 @@ do
     shift;;
     -o) output_file="$2"
     shift;;
+    -d) drugoption="$2"
+    shift;; 
     *) echo "You have entered an invalid option: -$1";;
   esac
   shift
 done
 
-Rscript $SOURCEDIR/source/Annotation.R  $SOURCEDIR/annotations/ $input_file $output_file
+Rscript $SOURCEDIR/source/Annotation.R  $SOURCEDIR/annotations/ $input_file $output_file $drugoption

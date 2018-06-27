@@ -1170,7 +1170,7 @@ void findsnp(char ** argv)
           continue;
         }
         //std::cout << "Ended" << '\n';
-        //std::cout << individual[i].quality_depth << '\n';
+        std::cout << individual[i].quality_depth << '\n';
         if(individual[i].quality_depth < min_coverage)
         {
           continue;
@@ -1179,6 +1179,7 @@ void findsnp(char ** argv)
         {
           int Var_allele_count = 0;
           Var_allele_count = individual[i].forward_var + individual[i].reverse_var;
+          std::cout << Var_allele_count << '\n';
           if(Var_allele_count < min_reads2)
           {
             continue;
@@ -1187,10 +1188,12 @@ void findsnp(char ** argv)
           {
             float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
             float temp = float(Var_allele_count)/float(individual[i].quality_depth);
+            std::cout << strandedness << '\n';
             if(strand_filter && (strandedness < 0.1 || strandedness > 0.9))
             {
               continue;
             }
+            std::cout << temp << '\n';
             if(temp < min_var_freq)
             {
               continue;
@@ -1205,9 +1208,11 @@ void findsnp(char ** argv)
             }
           }
         }
+        std::cout << individual[i].forward_ref+individual[i].reverse_ref << '\n';
+        std::cout << individual[i].forward_var+individual[i].reverse_var << '\n';
         int d = (individual[i].quality_depth)*0.001;
         double var_pval = fisher_test(individual[i].forward_ref+individual[i].reverse_ref,individual[i].forward_var+individual[i].reverse_var,individual[i].quality_depth-d,d);
-        //std::cout << var_pval << '\n';
+        std::cout << var_pval << '\n';
         if(var_pval > p_value){
           continue;
         }
