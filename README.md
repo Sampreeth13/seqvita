@@ -53,7 +53,7 @@ cd SeqVItA
 ./annotate -i Test.vcf -d genebased -o Output [Default:Variant based (rs ID) drug mapping]
 
 ```
-### OPTIONS AVAILABLE IN SeqVItA
+## Options available in SeqVItA
 
 | Key Parameter | Parameter Description | Default Value |
 |---|---|---|
