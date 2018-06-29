@@ -19,12 +19,12 @@ cd SeqVItA
 ```
 ## Usage
 
-```
-# VARIANT CALLING CAN BE CARRIED OUT USING ANY OF THE FOLLOWING MODULES:
+# Variant Calling can be carried out using any of the following modules:
 * germline (single sample/multiple samples)
 * somatic (case-control samples)
 * population (multiple samples)
 
+```
 # VARIANT CALLING FROM ALIGNMENT FILE
 ./variantCalling -v SNP -ib Test.bam -r hg19.fa -o output [options]
 ./variantCalling -v INDEL -ib Test.bam -r hg19.fa -o output [options]
