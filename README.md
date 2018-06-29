@@ -19,7 +19,7 @@ cd SeqVItA
 ```
 ## Usage
 
-### Variant Calling can be carried out using any of the following modules:
+Variant Calling can be carried out using any of the following modules:
 * germline (single sample/multiple samples)
 * somatic (case-control samples)
 * population (multiple samples)
