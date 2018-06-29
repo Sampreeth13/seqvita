@@ -20,29 +20,47 @@ cd SeqVItA
 ## Usage
 
 ```
+# VARIANT CALLING CAN BE CARRIED OUT USING ANY OF THE FOLLOWING MODULES:
+* germline (single sample/multiple samples)
+* somatic (case-control samples)
+* population (multiple samples)
+
 # VARIANT CALLING FROM ALIGNMENT FILE
-./variantCalling snp -ib Test.bam -r hg19.fa -o output.vcf
-./variantCalling indel -ib Test.bam ....
-./variantCalling germline -ib Test.bam
-./variantCalling somatic --normal normal.bam --tumor tumor.bam ...
+./variantCalling -v SNP -ib Test.bam -r hg19.fa -o output [options]
+./variantCalling -v INDEL -ib Test.bam -r hg19.fa -o output [options]
+./variantCalling -v germline -ib Test.bam -r hg19.fa -o output [options]
+./variantCalling -v somatic --normal normal.bam --tumor tumor.bam -r hg19.fa -o output [options]
+./variantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa -o output [options]
 
 # VARIANT CALLING FROM MPILEUP FILE
 
-./variantCalling snp -im Test.mpileup -o output.vcf
-./variantCalling indel -im Test.mpileup ....
-./variantCalling germline -im Test.mpileup
-./variantCalling somatic --normal normal.mpileup --tumor tumor.mpileup ...
+./variantCalling -v SNP -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
+./variantCalling -v INDEL -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
+./variantCalling -v germline -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
+./variantCalling -v somatic -im Test.mpileup -o output [options] [mpileup should contain normal-tumor information in the same order]
+./variantCalling -v population -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
 
 # VARIANT CALLING FROM WES/TS FILES
 
-./variantCalling snp -ib Test.bam -r hg19.fa --bed Coordinate_file -o output.vcf
-./variantCalling indel -i Test.bam --bed Coordinate_file ....
-./variantCalling germline -i Test.bam --bed Coordinate_file
-./variantCalling somatic --normal normal.bam --tumor tumor.bam --bed Coordinate_file ...
-
+./variantCalling -v SNP -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
+./variantCalling -v INDEL -ib Test.bam -r hg19.fa --bed Coordinate_file -o output 
+./variantCalling germline -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
+./variantCalling somatic --normal normal.bam --tumor tumor.bam --bed Coordinate_file -r hg19.fa  -o output
+./variantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa --bed Coordinate_file -o output [options]
 
 # VARIANT ANNOTATION
 
-./annotate -i Test.vcf --geneBasedDrug -o Output [Default:Variant based (rs ID) drug mapping]
+./annotate -i Test.vcf -d genebased -o Output [Default:Variant based (rs ID) drug mapping]
 
 ```
+### OPTIONS AVAILABLE IN SeqVItA
+
+| Key Parameter | Parameter Description | Default Value |
+|---|---|---|
+| --Qbase |	Base quality Cut-off | 15 |
+| --RD_th |	If no. of reads at a position > RD_th, the site is considered for variant calling |	10 |
+| --VAR_th |	If no. of reads supporting alternate allele at a position > VAR_th | 2 |
+| --VAF_th | Variant allele frequency  cut-off	 | 0.20 |
+|	--Strand_Bias	|Ignore variants with > 90% support is from the same strand |	1 |
+| --p-value	| p-value cut-off for calling variants | 0.01 |
+| --RD_alt	| Variant with VAF > RD_alt, the variant is homozygous, else heterozygous	| 0.75 |
