@@ -44,8 +44,8 @@ Variant Calling can be carried out using any of the following modules:
 
 ./variantCalling -v SNP -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
 ./variantCalling -v INDEL -ib Test.bam -r hg19.fa --bed Coordinate_file -o output 
-./variantCalling germline -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
-./variantCalling somatic --normal normal.bam --tumor tumor.bam --bed Coordinate_file -r hg19.fa  -o output
+./variantCalling -v germline -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
+./variantCalling -v somatic --normal normal.bam --tumor tumor.bam --bed Coordinate_file -r hg19.fa  -o output
 ./variantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa --bed Coordinate_file -o output [options]
 
 # VARIANT ANNOTATION
