@@ -57,7 +57,7 @@ Variant Calling can be carried out using any of the following modules:
 
 | Key Parameter | Parameter Description | Default Value |
 |---|---|---|
-| --Mqbase | Mapping quality Cut-off (Only when alignment in BAM format is used as input)| 20 |
+| --Mqread | Mapping quality Cut-off (Only when alignment in BAM format is used as input)| 20 |
 | --Mqcorr | Mapping quality correction using Samtools (Only when alignment in BAM format is used as input) | 0 |
 | --Qbase |	Base quality Cut-off | 15 |
 | --RD_th |	If no. of reads at a position > RD_th, the site is considered for variant calling |	10 |
@@ -65,6 +65,6 @@ Variant Calling can be carried out using any of the following modules:
 | --VAF_th | Variant allele frequency  cut-off	 | 0.20 |
 |	--Strand_Bias	|Ignore variants with > 90% support is from the same strand |	1 |
 | --p-value	| p-value cut-off for calling variants | 0.01 |
-| --RD_alt	| Variant with VAF > RD_alt, the variant is homozygous, else heterozygous	| 0.75 |
+| --VAF_homo	| Variant with VAF > RD_alt, the variant is homozygous, else heterozygous	| 0.75 |
 | --somatic-p-value | p-value cut-off for calling somatic and LOH variants (Only used in somatic module)| 0.05 |
 
