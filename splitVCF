@@ -1,0 +1,39 @@
+#!/bin/bash
+
+## Script to split VCF file generated from 'Somatic' module
+inputFlag=0;
+
+SHORTOPTS="i:o:"
+PROGNAME="splitVCF.sh"
+ARGS=$(getopt -s bash --options $SHORTOPTS  --name $PROGNAME -- "$@" )
+
+eval set -- "$ARGS"
+while true; do
+	case "$1" in
+	-i) inputVCF="$2"; inputFlag=1; shift 2; ;;
+        -o) output_file="$2"; shift 2;;
+        --help) echo "Usage: splitVCF -i <input VCF file> -o <output Prefix> ";
+         exit 1; ;;
+        --) shift; break;;
+        *) echo "Error: Something wrong with the parameters";
+	echo "Requred parameters: -i -o"; exit 1;;
+	esac
+done
+
+
+# FILE DOESNT EXIST ERROR
+if [[ ! -f $inputVCF ]]; then
+	echo "Input file not found" >&2
+      	exit 1
+fi
+
+##Generate separate files
+ 
+grep -v -e "Somatic" -e "Unknown" -e "LOH" $inputVCF > $output_file"_germline.vcf"
+grep -v -e "Germline" -e "Unknown" -e "LOH" $inputVCF > $output_file"_somatic.vcf"
+grep -v -e "Germline" -e "Unknown" -e "Somatic" $inputVCF > $output_file"_LOH.vcf"
+grep -v -e "Germline" -e "Somatic" -e "LOH" $inputVCF > $output_file"_unknown.vcf"
+
+
+
+

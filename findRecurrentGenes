@@ -1,0 +1,27 @@
+#!/bin/bash 
+
+##script to find receurrent mutations and corresponding genes in vcf file stored in a folder
+
+for file in  *.vcf
+do
+awk '!/^ *#/ {print FILENAME "\t"$0}' $file > $file"_var"
+done
+
+cat *"_var" >> filename_ins
+rm *_var 
+
+awk '{print $2,$3,$5,$6,$1}' OFS='\t' filename_ins > filename_rearrange
+
+sed -i 's/ /\t/g' filename_rearrange
+
+awk '{print $1, $2, $2+1,$3,$4,$5}' OFS='\t' filename_rearrange > variant_bed
+
+bedtools intersect -a variant_bed -b hg19.bed -wa -wb > gene_overlap 
+
+sed -i 's/ /\t/g' gene_overlap
+
+awk '{print $6,$11,$1,$2,$4">"$5}' OFS='\t' gene_overlap > final
+
+uniq final > recurrent_genes.txt
+
+rm final filename_ins filename_rearrange variant_bed gene_overlap

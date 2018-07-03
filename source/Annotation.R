@@ -30,12 +30,14 @@ ans = merge(x=ans,y=genes,by.x=c("gene_id"),by.y=c("ENSID"),all.x=TRUE)
 ans = ans[,c(2:ncol(ans))]
 ans= ans[order(ans$seqnames,ans$start),]
 ans$seqnames<-gsub("chr(*)","\\1",ans$seqnames)
+ans$alt=unstrsplit(CharacterList(ans$alt))
 if(nrow(ans) > 0){
   test <-  rfPred_scores(variant_list = ans[1:4],data=paste(arg[1],"all_chr_rfPred.txtz",sep=""),index=paste(arg[1],"all_chr_rfPred.txtz.tbi",sep=""),all.col = TRUE)
   p <- merge(x=ans,y=test,by.x=c("seqnames", "start","gene_name"),by.y=c("chromosome","position_hg19","genename"),all.x=TRUE)
   q<-p[with(p,order(start)), ]
   r<-q[,c("seqnames","start","ref","alt","type","gene_name","AA_Change","SIFT_score","Polyphen2_score","MutationTaster_score","PhyloP_score","LRT_score")]
   r$seqnames <- paste("chr",r$seqnames,sep="")
+  r=unique(r)
 }else{
   r = data.frame(seqnames=character(),start=character(),ref=character(),alt.value=character(),type=character(),gene_name=character(),AA_Change=character(),SIFT_score=character(),Polyphen2_score=character(),MutationTaster_score=character(),PhyloP_score=character(),"LRT_score"=character())
 }
