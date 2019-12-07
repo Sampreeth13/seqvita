@@ -25,6 +25,7 @@ float min_freq_for_hom = 0.75;
 float p_value = 0.99;
 float somatic_p_value = 0.05;
 int strand_filter =1;
+float min_allele_freq = 0.05;
 
 struct data
 {
@@ -624,7 +625,7 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
       if(GQ > 255 || GQ <= 0){
         GQ = 255;
       }
-      Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
+      Genotype += ":" + itoa(GQ) + ":" + pileup[3+3*i] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
       Genotype += itoa(var_depth) + ":" ;
       float temp;
       if(individual[i].quality_depth){
@@ -667,7 +668,7 @@ void pileuptovcf(std::vector<string> &pileup, std::vector<data>  &individual)//c
       if(GQ > 255 || GQ <= 0){
         GQ = 255;
       }
-      Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
+      Genotype += ":" + itoa(GQ) + ":" + pileup[3+3*i] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
       Genotype += itoa(var_depth) + ":" ;
       float temp;
       if(individual[i].quality_depth){
@@ -801,7 +802,7 @@ void Populationpileuptovcf(std::vector<string> &pileup, std::vector<data>  &indi
       if(GQ > 255 || GQ <= 0){
         GQ = 255;
       }
-      Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
+      Genotype += ":" + itoa(GQ) + ":" + pileup[3+3*i] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
       Genotype += itoa(var_depth) + ":" ;
       float temp = roundf((float(var_depth)/float(individual[i].quality_depth))*10000);
       Genotype += ftoa(float(temp)/100) + "%:" + pvalstr + ":";
@@ -830,7 +831,7 @@ void Populationpileuptovcf(std::vector<string> &pileup, std::vector<data>  &indi
       if(GQ > 255 || GQ <= 0){
         GQ = 255;
       }
-      Genotype += ":" + itoa(GQ) + ":" + pileup[3] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
+      Genotype += ":" + itoa(GQ) + ":" + pileup[3+3*i] + ":" + itoa(individual[i].quality_depth) + ":" + itoa(ref_depth) + ":";
       Genotype += itoa(var_depth) + ":";
       float temp;
       if(individual[i].quality_depth){
@@ -861,36 +862,23 @@ void Populationpileuptovcf(std::vector<string> &pileup, std::vector<data>  &indi
     total_depth += individual[i].quality_depth;
   }
   string MAF= "";
-  if(variant_order.size()<=1){
-    MAF = "NA";
-  }
-  else{
-    int first=0,second=0;
-    for(i=0;i<variant_order.size()+1;i++)
-    {
-      if(var_freq[i] > var_freq[first]){
-        second = first;
-        first = i;
-      }
-      else if(var_freq[i] > var_freq[second] && var_freq[i] != var_freq[first]){
-        second = i;
-      }
-    }
-    string allele = "";
-    if(second!=0){
-      for(auto &i : variant_order){
-        if(var_freq[i.second] == var_freq[second]){
-          allele += i.first + ",";
-        }
-      }
-      allele.pop_back();
-      float temp = roundf((float(var_freq[second])/float(no_of_samples))*10000);
-      MAF = ftoa(float(temp)/100) + "%" + "(" + allele + ")";
-    }
-    else{
-      MAF = "NA";
+  int first=0;
+  for(i=0;i<variant_order.size()+1;i++)
+  {
+    if(var_freq[i] > var_freq[first]){
+      first = i;
     }
   }
+  string allele = "";
+  for(auto &i : variant_order){
+    if(var_freq[i.second] == var_freq[first]){
+      allele += i.first + ",";
+    }
+  }
+  allele.pop_back();
+  float temp = roundf((float(var_freq[first])/float(no_of_samples))*10000);
+  if((float(temp)/10000) < min_allele_freq) return;
+  MAF = ftoa(float(temp)/100) + "%" + "(" + allele + ")";
   vcf_line += "ADP=" + itoa(total_depth/no_of_samples) + ";WT=" + itoa(wild_type) + ";HET=" + itoa(heterozygous) + ";HOM=" + itoa(homozygous) + ";NS=" + itoa(no_of_samples) + ";MAF=" + MAF;
   vcf_line += "\tGT:GQ:SDP:DP:RD:AD:FREQ:PVAL:RBQ:ABQ:RDF:RDR:ADF:ADR" + Genotype;
   //std::cout << vcf_line << std::endl;
@@ -1693,15 +1681,15 @@ int main (int argc, char *argv[])
   {
     mpileuptoindel = true;
   }
-  else if(strcmp(argv[1],"BOTH") == 0)
+  else if(strcmp(argv[1],"germline") == 0)
   {
     mpileuptogermline = true;
   }
-  else if(strcmp(argv[1],"SOM") == 0)
+  else if(strcmp(argv[1],"somatic") == 0)
   {
     mpileuptosomatic = true;
   }
-  else if(strcmp(argv[1],"POP") == 0)
+  else if(strcmp(argv[1],"population") == 0)
   {
     mpileuptopopulation = true;
   }
@@ -1745,6 +1733,11 @@ int main (int argc, char *argv[])
     else if (strcmp(argv[i],"--somatic-p-value") == 0)
     {
       somatic_p_value = atof(argv[i+1]);
+      i += 2;
+    }
+    else if (strcmp(argv[i],"--min-allele-freq") == 0)
+    {
+      min_allele_freq = atof(argv[i+1]);
       i += 2;
     }
     else
