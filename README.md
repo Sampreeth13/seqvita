@@ -26,31 +26,31 @@ Variant Calling can be carried out using any of the following modules:
 
 ```
 # VARIANT CALLING FROM ALIGNMENT FILE
-./variantCalling -v SNP -ib Test.bam -r hg19.fa -o output [options]
-./variantCalling -v INDEL -ib Test.bam -r hg19.fa -o output [options]
-./variantCalling -v germline -ib Test.bam -r hg19.fa -o output [options]
-./variantCalling -v somatic --normal normal.bam --tumor tumor.bam -r hg19.fa -o output [options]
-./variantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa -o output [options]
+./VariantCalling -v SNP -ib Test.bam -r hg19.fa -o output [options]
+./VariantCalling -v INDEL -ib Test.bam -r hg19.fa -o output [options]
+./VariantCalling -v germline -ib Test.bam -r hg19.fa -o output [options]
+./VariantCalling -v somatic --normal normal.bam --tumor tumor.bam -r hg19.fa -o output [options]
+./VariantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa -o output [options]
 
 # VARIANT CALLING FROM MPILEUP FILE
 
-./variantCalling -v SNP -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
-./variantCalling -v INDEL -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
-./variantCalling -v germline -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
-./variantCalling -v somatic -im Test.mpileup -o output [options] [mpileup should contain normal-tumor information in the same order]
-./variantCalling -v population -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
+./VariantCalling -v SNP -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
+./VariantCalling -v INDEL -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
+./VariantCalling -v germline -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
+./VariantCalling -v somatic -im Test.mpileup -o output [options] [mpileup should contain normal-tumor information in the same order]
+./VariantCalling -v population -im Test.mpileup -o output [options] [mpileup should contain all the samples information]
 
 # VARIANT CALLING FROM WES/TS FILES
 
-./variantCalling -v SNP -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
-./variantCalling -v INDEL -ib Test.bam -r hg19.fa --bed Coordinate_file -o output 
-./variantCalling -v germline -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
-./variantCalling -v somatic --normal normal.bam --tumor tumor.bam --bed Coordinate_file -r hg19.fa  -o output
-./variantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa --bed Coordinate_file -o output [options]
+./VariantCalling -v SNP -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
+./VariantCalling -v INDEL -ib Test.bam -r hg19.fa --bed Coordinate_file -o output 
+./VariantCalling -v germline -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
+./VariantCalling -v somatic --normal normal.bam --tumor tumor.bam --bed Coordinate_file -r hg19.fa  -o output
+./VariantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa --bed Coordinate_file -o output [options]
 
 # VARIANT ANNOTATION
 
-./annotate -i Test.vcf -d genebased -o Output [Default:Variant based (rs ID) drug mapping]
+./Annotate -i Test.vcf -d genebased -o Output [Default:Variant based (rs ID) drug mapping]
 
 ```
 ## Options available in SeqVItA
