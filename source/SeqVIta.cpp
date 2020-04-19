@@ -1174,12 +1174,12 @@ void findsnp(char ** argv)
           {
             float strandedness = float(individual[i].forward_var)/float(Var_allele_count);
             float temp = float(Var_allele_count)/float(individual[i].quality_depth);
-            std::cout << strandedness << '\n';
+            //std::cout << strandedness << '\n';
             if(strand_filter && (strandedness < 0.1 || strandedness > 0.9))
             {
               continue;
             }
-            std::cout << temp << '\n';
+            //std::cout << temp << '\n';
             if(temp < min_var_freq)
             {
               continue;
