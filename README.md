@@ -29,7 +29,7 @@ Variant Calling can be carried out using any of the following modules:
 ./VariantCalling -v SNP -ib Test.bam -r hg19.fa -o output [options]
 ./VariantCalling -v INDEL -ib Test.bam -r hg19.fa -o output [options]
 ./VariantCalling -v germline -ib Test.bam -r hg19.fa -o output [options]
-./VariantCalling -v somatic --normal normal.bam --tumor tumor.bam -r hg19.fa -o output [options]
+./VariantCalling -v somatic -normal normal.bam -tumor tumor.bam -r hg19.fa -o output [options]
 ./VariantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa -o output [options]
 
 # VARIANT CALLING FROM MPILEUP FILE
@@ -42,11 +42,11 @@ Variant Calling can be carried out using any of the following modules:
 
 # VARIANT CALLING FROM WES/TS FILES
 
-./VariantCalling -v SNP -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
-./VariantCalling -v INDEL -ib Test.bam -r hg19.fa --bed Coordinate_file -o output 
-./VariantCalling -v germline -ib Test.bam -r hg19.fa --bed Coordinate_file -o output
-./VariantCalling -v somatic --normal normal.bam --tumor tumor.bam --bed Coordinate_file -r hg19.fa  -o output
-./VariantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa --bed Coordinate_file -o output [options]
+./VariantCalling -v SNP -ib Test.bam -r hg19.fa -bed Coordinate_file -o output
+./VariantCalling -v INDEL -ib Test.bam -r hg19.fa -bed Coordinate_file -o output 
+./VariantCalling -v germline -ib Test.bam -r hg19.fa -bed Coordinate_file -o output
+./VariantCalling -v somatic -normal normal.bam -tumor tumor.bam -bed Coordinate_file -r hg19.fa  -o output
+./VariantCalling -v population -ib 1.bam 2.bam 3.bam 4.bam ... -r hg19.fa -bed Coordinate_file -o output [options]
 
 # VARIANT ANNOTATION
 
