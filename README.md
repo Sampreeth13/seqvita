@@ -58,7 +58,7 @@ Variant Calling can be carried out using any of the following modules:
 | Key Parameter | Parameter Description | Default Value |
 |---|---|---|
 | --Mqread | Mapping quality Cut-off (Only when alignment in BAM format is used as input)| 20 |
-| --Mqcorr | Mapping quality correction using Samtools (Only when alignment in BAM format is used as input) | 0 |
+| --Mqcorr | Mapping quality correction using Samtools (Only when alignment in BAM format is used as input)(A value of 50 may be considered in case the BAM file is generated using Bowtie or BWA methods | 0 |
 | --Qbase |	Base quality Cut-off | 15 |
 | --RD_th |	If no. of reads at a position > RD_th, the site is considered for variant calling |	10 |
 | --VAR_th |	If no. of reads supporting alternate allele at a position > VAR_th | 2 |
