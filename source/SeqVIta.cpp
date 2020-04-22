@@ -17,7 +17,7 @@ using namespace std;
 
 //default Parameters
 
-int min_coverage = 8;
+int min_coverage = 10;
 int min_reads2 = 2;
 int min_avg_qual = 15;
 float min_var_freq = 0.20;
